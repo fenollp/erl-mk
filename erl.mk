@@ -44,14 +44,12 @@ ebin/%.beam: src/%.core
 ebin/%.app: src/%.app.src
 	cp $< $@
 
-APPSRC = $(patsubst src/%.app.src,ebin/%.app,$(wildcard src/*.app.src))
-ERLS = $(patsubst src/%.erl,ebin/%.beam,$(wildcard src/*.erl))
-XRLS = $(patsubst src/%.xrl,ebin/%.beam,$(wildcard src/*.xrl))
-YRLS = $(patsubst src/%.yrl,ebin/%.beam,$(wildcard src/*.yrl))
-ASMS = $(patsubst src/%.S,ebin/%.beam,$(wildcard src/*.S))
-CORES = $(patsubst src/%.core,ebin/%.beam,$(wildcard src/*.core))
-
-app: ebin/ $(APPSRC) $(ERLS) $(XRLS) $(YRLS) $(ASMS) $(CORES)
+app: ebin/ $(patsubst src/%.app.src,ebin/%.app,$(wildcard src/*.app.src))     \
+           $(patsubst src/%.erl,ebin/%.beam,$(wildcard src/*.erl))            \
+           $(patsubst src/%.xrl,ebin/%.beam,$(wildcard src/*.xrl))            \
+           $(patsubst src/%.yrl,ebin/%.beam,$(wildcard src/*.yrl))            \
+           $(patsubst src/%.S,ebin/%.beam,$(wildcard src/*.S))                \
+           $(patsubst src/%.core,ebin/%.beam,$(wildcard src/*.core))
 #	echo $?
 .PHONY: app
 
