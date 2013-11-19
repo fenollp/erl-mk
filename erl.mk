@@ -19,6 +19,9 @@ clean-deps:
 deps/:
 	mkdir deps/
 
+#deps: get-deps
+#	$(foreach dep,$(wildcard deps/*/),make -C $(dep) all;)
+
 ####
 
 ebin/%.beam: src/%.erl
