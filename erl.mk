@@ -26,13 +26,17 @@ deps: get-deps
 .PHONY: deps
 
 update-deps: get-deps
-	$(foreach dep,$(patsubst deps/%/,%,$(wildcard deps/*/)),cd deps/$(dep)/ && git fetch origin && git fetch --tags origin && git checkout -q $(word 2,$(dep_$(dep)));)
+	$(foreach dep,$(patsubst deps/%/,%,$(wildcard deps/*/)), \
+                                              cd deps/$(dep)/ && \
+                                             git fetch origin && \
+                                      git fetch --tags origin && \
+                         git checkout -q $(word 2,$(dep_$(dep)));)
 .PHONY: update-deps
 
 ####
 
 ebin/%.beam: src/%.erl
-	erlc $(ERL_OPTS) -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
+	erlc $(ERLCFLAGS) -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
 
 ebin/%.beam: src/%.xrl
 	erlc -o ebin/ $<
@@ -43,10 +47,10 @@ ebin/%.beam: src/%.yrl
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S
-	erlc $(ERL_OPTS) +from_asm -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
+	erlc $(ERLCFLAGS) +from_asm -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
 
 ebin/%.beam: src/%.core
-	erlc $(ERL_OPTS) +from_core -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
+	erlc $(ERLCFLAGS) +from_core -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
 
 ebin/%.app: src/%.app.src
 	cp $< $@
