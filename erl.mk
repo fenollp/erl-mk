@@ -29,11 +29,12 @@ ebin/%.beam: src/%.yrl
 ebin/%.app: src/%.app.src
 	touch ebin/$*.app
 
+APPSRC = $(patsubst src/%.app.src,ebin/%.app,$(wildcard src/*.app.src))
 ERLS = $(patsubst src/%.erl,ebin/%.beam,$(wildcard src/*.erl))
 XRLS = $(patsubst src/%.xrl,ebin/%.beam,$(wildcard src/*.xrl))
 YRLS = $(patsubst src/%.yrl,ebin/%.beam,$(wildcard src/*.yrl))
 
-project: ebin/$(PROJECT).app $(ERLS) $(XRLS) $(YRLS)
+project: $(APPSRC) $(ERLS) $(XRLS) $(YRLS)
 	echo $?
 
 ebin:
