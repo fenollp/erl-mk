@@ -1,11 +1,11 @@
-all: ebin project
+all: ebin/ project
 .PHONY: all
 
 ####
 
 ALL_DEPS_DIRS = $(addprefix deps/,$(DEPS))
 
-get-deps : $(ALL_DEPS_DIRS)
+get-deps : deps/ $(ALL_DEPS_DIRS)
 
 deps/%/:
 	git clone -n 
@@ -13,6 +13,9 @@ deps/%/:
 
 #clean-deps:
 #	$(foreach dep,$(DEPS),+$(MAKE) clean -C $(dep);)
+
+deps/:
+	mkdir deps/
 
 ####
 
@@ -46,7 +49,7 @@ CORES = $(patsubst src/%.core,ebin/%.beam,$(wildcard src/*.core))
 project: $(APPSRC) $(ERLS) $(XRLS) $(YRLS) $(ASMS) $(CORES)
 #	echo $?
 
-ebin:
+ebin/:
 	mkdir ebin/
 
 distclean:
