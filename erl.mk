@@ -1,4 +1,4 @@
-all: ebin/ project
+all: app
 .PHONY: all
 
 ####
@@ -48,9 +48,9 @@ YRLS = $(patsubst src/%.yrl,ebin/%.beam,$(wildcard src/*.yrl))
 ASMS = $(patsubst src/%.S,ebin/%.beam,$(wildcard src/*.S))
 CORES = $(patsubst src/%.core,ebin/%.beam,$(wildcard src/*.core))
 
-project: $(APPSRC) $(ERLS) $(XRLS) $(YRLS) $(ASMS) $(CORES)
+app: ebin/ $(APPSRC) $(ERLS) $(XRLS) $(YRLS) $(ASMS) $(CORES)
 #	echo $?
-.PHONY: project
+.PHONY: app
 
 ebin/:
 	mkdir ebin/
