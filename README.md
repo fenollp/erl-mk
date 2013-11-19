@@ -42,7 +42,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 	* common test
 	* test deps
 	* compiling dtl files
-	* support options and ENV variables
+	* support options and ENV variables like ERLCFLAGS
 
 ## ¬TODO
 * `relx`|`rebar` download tool | wrapper
