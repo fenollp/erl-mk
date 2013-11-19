@@ -27,7 +27,7 @@ ebin/%.beam: src/%.yrl
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.app: src/%.app.src
-	touch ebin/$*.app
+	cp $< $@
 
 APPSRC = $(patsubst src/%.app.src,ebin/%.app,$(wildcard src/*.app.src))
 ERLS = $(patsubst src/%.erl,ebin/%.beam,$(wildcard src/*.erl))
