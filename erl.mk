@@ -1,4 +1,4 @@
-all: app
+all: deps app
 .PHONY: all
 
 ####
@@ -28,7 +28,7 @@ deps: get-deps
 ####
 
 ebin/%.beam: src/%.erl
-	erlc $(ERL_OPTS) -v -o ebin/ -pa ebin/ -I include/ $<
+	erlc $(ERL_OPTS) -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
 
 ebin/%.beam: src/%.xrl
 	erlc -o ebin/ $<
@@ -39,10 +39,10 @@ ebin/%.beam: src/%.yrl
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S
-	erlc $(ERL_OPTS) -v +from_asm -o ebin/ -pa ebin/ -I include/ $<
+	erlc $(ERL_OPTS) +from_asm -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
 
 ebin/%.beam: src/%.core
-	erlc $(ERL_OPTS) -v +from_core -o ebin/ -pa ebin/ -I include/ $<
+	erlc $(ERL_OPTS) +from_core -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
 
 ebin/%.app: src/%.app.src
 	cp $< $@
