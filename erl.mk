@@ -6,6 +6,7 @@ all: ebin/ project
 ALL_DEPS_DIRS = $(addprefix deps/,$(DEPS))
 
 get-deps : deps/ $(ALL_DEPS_DIRS)
+.PHONY: get-deps
 
 deps/%/:
 	git clone -n -- $(word 1,$(dep_$*)) $@
@@ -13,6 +14,7 @@ deps/%/:
 
 clean-deps:
 	$(foreach dep,$(wildcard deps/*/),make -C $(dep) clean;)
+.PHONY: clean-deps
 
 deps/:
 	mkdir deps/
@@ -48,9 +50,14 @@ CORES = $(patsubst src/%.core,ebin/%.beam,$(wildcard src/*.core))
 
 project: $(APPSRC) $(ERLS) $(XRLS) $(YRLS) $(ASMS) $(CORES)
 #	echo $?
+.PHONY: project
 
 ebin/:
 	mkdir ebin/
+
+clean: clean-deps
+	rm -rf ebin/
+.PHONY: clean
 
 distclean:
 	rm -rf ebin/ deps/
