@@ -25,6 +25,10 @@ deps: get-deps
 	$(foreach dep,$(wildcard deps/*/),make -C $(dep) all;)
 .PHONY: deps
 
+update-deps: get-deps
+	$(foreach dep,$(patsubst deps/%/,%,$(wildcard deps/*/)),cd deps/$(dep)/ && git fetch origin && git fetch --tags origin && git checkout -q $(word 2,$(dep_$(dep)));)
+.PHONY: update-deps
+
 ####
 
 ebin/%.beam: src/%.erl
