@@ -20,11 +20,11 @@ ebin/%.beam: src/%.erl
 
 ebin/%.beam: src/%.xrl
 	erlc -o ebin/ $<
-	erlc $(ERL_OPTS) -o ebin/ ebin/$*.erl
+	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.yrl
 	erlc -o ebin/ $<
-	erlc $(ERL_OPTS) -o ebin/ ebin/$*.erl
+	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.app: src/%.app.src
 	touch ebin/$*.app
