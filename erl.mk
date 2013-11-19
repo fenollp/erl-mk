@@ -5,7 +5,7 @@ all: app
 
 ALL_DEPS_DIRS = $(addprefix deps/,$(DEPS))
 
-get-deps : deps/ $(ALL_DEPS_DIRS)
+get-deps : deps-dir $(ALL_DEPS_DIRS)
 .PHONY: get-deps
 
 deps/%/:
@@ -16,11 +16,14 @@ clean-deps:
 	$(foreach dep,$(wildcard deps/*/),make -C $(dep) clean;)
 .PHONY: clean-deps
 
-deps/:
-	mkdir deps/
+deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
+          #   ‘warning: overriding recipe for target `xxx'’
+          #   ‘warning: ignoring old recipe for target `xxx'’
+	mkdir -p deps/
 
-#deps: get-deps
-#	$(foreach dep,$(wildcard deps/*/),make -C $(dep) all;)
+deps: get-deps
+	$(foreach dep,$(wildcard deps/*/),make -C $(dep) all;)
+.PHONY: deps
 
 ####
 
