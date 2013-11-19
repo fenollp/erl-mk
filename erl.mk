@@ -8,8 +8,8 @@ ALL_DEPS_DIRS = $(addprefix deps/,$(DEPS))
 get-deps : deps/ $(ALL_DEPS_DIRS)
 
 deps/%/:
-	git clone -n 
-#	+$(MAKE) -C $@
+	git clone -n -- $(word 1,$(dep_$*)) $@
+	cd $@ && git checkout -q $(word 2,$(dep_$*))
 
 #clean-deps:
 #	$(foreach dep,$(DEPS),+$(MAKE) clean -C $(dep);)
