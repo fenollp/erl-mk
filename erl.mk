@@ -11,8 +11,8 @@ deps/%/:
 	git clone -n -- $(word 1,$(dep_$*)) $@
 	cd $@ && git checkout -q $(word 2,$(dep_$*))
 
-#clean-deps:
-#	$(foreach dep,$(DEPS),+$(MAKE) clean -C $(dep);)
+clean-deps:
+	$(foreach dep,$(wildcard deps/*/),make -C $(dep) clean;)
 
 deps/:
 	mkdir deps/
