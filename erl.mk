@@ -1,34 +1,48 @@
-all: deps app
+all: compile
 .PHONY: all
+
+compile: get-deps
+	make deps app
+.PHONY: compile
 
 #### DEPS
 
-get-deps : $(addprefix deps/,$(DEPS))
+get-deps : $(patsubst %,deps/%/,$(DEPS))
 .PHONY: get-deps
 
 deps/%/: | deps-dir
-	git clone -n -- $(word 1,$(dep_$*)) $@
-	cd $@ && git checkout -q $(word 2,$(dep_$*))
+	$(if $(wildcard $@/.git/),, \
+	    git clone -n -- $(word 1,$(dep_$*)) $@ && \
+	        cd $@ && git checkout -q $(word 2,$(dep_$*)))
 	$(if $(wildcard $@/Makefile), \
-            make -C $@ get-deps, \
-            cd $@ && rebar get-deps)
+	    make -C $@ all, \
+	    cd $@ && rebar get-deps compile)
 
 deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
           #   ‘warning: overriding recipe for target `xxx'’
           #   ‘warning: ignoring old recipe for target `xxx'’
-	$(if $(wildcard deps/),,mkdir deps/) # <> mkdir -p deps/
+	$(if $(wildcard deps/),,mkdir deps/)
 
 # Rewrite using 'deps/%/ebin/' when empty dir
 clean-deps:
-	$(foreach dep,$(wildcard deps/*/),make -C $(dep) clean;)
-.PHONY: clean-deps
-
-# Rewrite using dependency on 'deps/%/ebin/%.beam'
-deps: get-deps
 	$(foreach dep,$(wildcard deps/*/), \
             $(if $(wildcard $(dep)/Makefile), \
-                make -C $(dep) all, \
-                cd $(dep) && rebar compile); )
+                make -C $(dep) clean, \
+                cd $(dep) && rebar clean;))
+.PHONY: clean-deps
+
+deps/%/ebin/: deps/%/
+	echo $< -----------------------
+	$(if $(wildcard $</Makefile), \
+                make -C $< all, \
+                cd $< && rebar compile)
+# Rewrite using dependency on 'deps/%/ebin/%.beam'
+#deps: get-deps
+#	$(foreach dep,$(wildcard deps/*/), \
+ #           $(if $(wildcard $(dep)/Makefile), \
+  #              make -C $(dep) all, \
+   #             cd $(dep) && rebar compile); )
+deps: $(patsubst deps/%/, deps/%/ebin/, $(wildcard deps/*/))
 .PHONY: deps
 
 update-deps: get-deps
