@@ -1,14 +1,10 @@
-all: compile
+all: deps app
 .PHONY: all
-
-compile: get-deps
-	make deps app
-.PHONY: compile
 
 #### DEPS
 
-get-deps : $(patsubst %,deps/%/,$(DEPS))
-.PHONY: get-deps
+deps : $(patsubst %,deps/%/,$(DEPS))
+.PHONY: deps
 
 deps/%/: | deps-dir
 	$(if $(wildcard $@/.git/),, \
@@ -23,7 +19,6 @@ deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
           #   ‘warning: ignoring old recipe for target `xxx'’
 	$(if $(wildcard deps/),,mkdir deps/)
 
-# Rewrite using 'deps/%/ebin/' when empty dir
 clean-deps:
 	$(foreach dep,$(wildcard deps/*/), \
             $(if $(wildcard $(dep)/Makefile), \
@@ -31,21 +26,7 @@ clean-deps:
                 cd $(dep) && rebar clean;))
 .PHONY: clean-deps
 
-deps/%/ebin/: deps/%/
-	echo $< -----------------------
-	$(if $(wildcard $</Makefile), \
-                make -C $< all, \
-                cd $< && rebar compile)
-# Rewrite using dependency on 'deps/%/ebin/%.beam'
-#deps: get-deps
-#	$(foreach dep,$(wildcard deps/*/), \
- #           $(if $(wildcard $(dep)/Makefile), \
-  #              make -C $(dep) all, \
-   #             cd $(dep) && rebar compile); )
-deps: $(patsubst deps/%/, deps/%/ebin/, $(wildcard deps/*/))
-.PHONY: deps
-
-update-deps: get-deps
+update-deps: deps
 	$(foreach dep,$(patsubst deps/%/,%,$(wildcard deps/*/)), \
                                               cd deps/$(dep)/ && \
                                              git fetch origin && \
