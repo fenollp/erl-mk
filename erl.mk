@@ -11,11 +11,9 @@ get-deps : deps-dir $(ALL_DEPS_DIRS)
 deps/%/:
 	git clone -n -- $(word 1,$(dep_$*)) $@
 	cd $@ && git checkout -q $(word 2,$(dep_$*))
-ifneq (,$(wildcard $@/Makefile)) # If there's a Makefile in $@.
-	make -C $@ get-deps
-else
-	cd $@ && rebar get-deps
-endif
+	$(if $(wildcard $@/Makefile), \
+            make -C $@ get-deps, \
+            cd $@ && rebar get-deps)
 
 clean-deps:
 	$(foreach dep,$(wildcard deps/*/),make -C $(dep) clean;)
