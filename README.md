@@ -12,6 +12,8 @@ include erl.mk
 # Your targets after this line.
 ```
 
+Now, `make -j 5`. This is the parallel exquivalent of `rebar get-deps compile`.
+
 ## Why?
 * `rebar` is too slow for a tight dev-fail loop.
 * **erlang.mk** had too many [quirks](https://github.com/extend/erlang.mk/issues/21) and uses too many shell code & loops (ie slow again)
@@ -19,9 +21,11 @@ include erl.mk
 ## Usage
 **erl.mk** implements most of [erlang.mk](https://github.com/extend/erlang.mk)'s capabilities
 except the packaging stuff, and also some of `rebar`'s commands.
-Thus the compiling and dependency handling commands are available, but not ‹paste TODO›.
+Thus the compiling and dependency handling commands are available, but not ‹paste TODO›.  
 
-Dependency specification is the same as **erlang.mk**'s. But it builds a `rebar`-like deps/ architecture.
+You should be set with `all`, `clean` and `update-deps` `make` targets.
+
+Dependency specification is the same as **erlang.mk**'s.
 ```make
 DEPS = cowboy bullet
 dep_cowboy = https://github.com/extend/cowboy.git 0.8.4

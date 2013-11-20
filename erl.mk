@@ -9,10 +9,10 @@ deps : $(patsubst %,deps/%/,$(DEPS))
 deps/%/: | deps-dir
 	$(if $(wildcard $@/.git/),, \
 	    git clone -n -- $(word 1,$(dep_$*)) $@ && \
-	        cd $@ && git checkout -q $(word 2,$(dep_$*)))
+	        cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../../)
 	$(if $(wildcard $@/Makefile), \
 	    make -C $@ all, \
-	    cd $@ && rebar get-deps compile)
+	    cd $@ && rebar get-deps compile && cd ../../)
 
 deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
           #   ‘warning: overriding recipe for target `xxx'’
@@ -31,7 +31,8 @@ update-deps: deps
                                               cd deps/$(dep)/ && \
                                              git fetch origin && \
                                       git fetch --tags origin && \
-                         git checkout -q $(word 2,$(dep_$(dep)));)
+                      git checkout -q $(word 2,$(dep_$(dep))) && \
+                                                      cd ../../; )
 .PHONY: update-deps
 
 #### APP
