@@ -3,10 +3,10 @@ all: deps app
 
 #### DEPS
 
-get-deps : deps-dir $(addprefix deps/,$(DEPS))
+get-deps : $(addprefix deps/,$(DEPS))
 .PHONY: get-deps
 
-deps/%/:
+deps/%/: | deps-dir
 	git clone -n -- $(word 1,$(dep_$*)) $@
 	cd $@ && git checkout -q $(word 2,$(dep_$*))
 	$(if $(wildcard $@/Makefile), \
@@ -16,7 +16,7 @@ deps/%/:
 deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
           #   ‘warning: overriding recipe for target `xxx'’
           #   ‘warning: ignoring old recipe for target `xxx'’
-	mkdir -p deps/
+	$(if $(wildcard deps/),,mkdir deps/) # <> mkdir -p deps/
 
 # Rewrite using 'deps/%/ebin/' when empty dir
 clean-deps:
