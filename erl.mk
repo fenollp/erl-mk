@@ -41,32 +41,32 @@ update-deps: get-deps
 
 #### APP
 
-ebin/%.beam: src/%.erl
+ebin/%.beam: src/%.erl      | ebin/
 	erlc $(ERLCFLAGS) -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ -I deps/ $<
 
-ebin/%.beam: src/%.xrl
+ebin/%.beam: src/%.xrl      | ebin/
 	erlc -o ebin/ $<
 	erlc -o ebin/ ebin/$*.erl
 
-ebin/%.beam: src/%.yrl
+ebin/%.beam: src/%.yrl      | ebin/
 	erlc -o ebin/ $<
 	erlc -o ebin/ ebin/$*.erl
 
-ebin/%.beam: src/%.S
+ebin/%.beam: src/%.S        | ebin/
 	erlc $(ERLCFLAGS) +from_asm -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
 
-ebin/%.beam: src/%.core
+ebin/%.beam: src/%.core     | ebin/
 	erlc $(ERLCFLAGS) +from_core -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
 
-ebin/%.app: src/%.app.src
+ebin/%.app: src/%.app.src   | ebin/
 	cp $< $@
 
-app: ebin/ $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src))    \
-           $(patsubst src/%.erl,    ebin/%.beam,$(wildcard src/*.erl    ))    \
-           $(patsubst src/%.xrl,    ebin/%.beam,$(wildcard src/*.xrl    ))    \
-           $(patsubst src/%.yrl,    ebin/%.beam,$(wildcard src/*.yrl    ))    \
-           $(patsubst src/%.S,      ebin/%.beam,$(wildcard src/*.S      ))    \
-           $(patsubst src/%.core,   ebin/%.beam,$(wildcard src/*.core   ))
+app: $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src)) \
+     $(patsubst src/%.erl,    ebin/%.beam,$(wildcard src/*.erl    )) \
+     $(patsubst src/%.xrl,    ebin/%.beam,$(wildcard src/*.xrl    )) \
+     $(patsubst src/%.yrl,    ebin/%.beam,$(wildcard src/*.yrl    )) \
+     $(patsubst src/%.S,      ebin/%.beam,$(wildcard src/*.S      )) \
+     $(patsubst src/%.core,   ebin/%.beam,$(wildcard src/*.core   ))
 #	echo $?
 .PHONY: app
 
