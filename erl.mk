@@ -37,7 +37,7 @@ update-deps: deps
 #### APP
 
 ebin/%.beam: src/%.erl      | ebin/
-	erlc $(ERLCFLAGS) -v -o ebin/ -Iinclude/ -Ideps/ $< -pa ebin/ -pa -- deps/*/ebin/
+	erlc $(ERLCFLAGS) -v -o ebin/ -Iinclude/ -Ideps/ $<
 
 ebin/%.beam: src/%.xrl      | ebin/
 	erlc -o ebin/ $<
@@ -48,10 +48,10 @@ ebin/%.beam: src/%.yrl      | ebin/
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S        | ebin/
-	erlc $(ERLCFLAGS) +from_asm -v -o ebin/ -Iinclude/ -Ideps/ $< -pa ebin/ -pa -- deps/*/ebin/
+	erlc $(ERLCFLAGS) +from_asm -v -o ebin/ -Iinclude/ -Ideps/ $<
 
 ebin/%.beam: src/%.core     | ebin/
-	erlc $(ERLCFLAGS) +from_core -v -o ebin/ -Iinclude/ -Ideps/ $< -pa ebin/ -pa -- deps/*/ebin/
+	erlc $(ERLCFLAGS) +from_core -v -o ebin/ -Iinclude/ -Ideps/ $<
 
 ebin/%.app: src/%.app.src   | ebin/
 	cp $< $@
