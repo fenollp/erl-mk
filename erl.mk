@@ -11,6 +11,11 @@ get-deps : deps-dir $(ALL_DEPS_DIRS)
 deps/%/:
 	git clone -n -- $(word 1,$(dep_$*)) $@
 	cd $@ && git checkout -q $(word 2,$(dep_$*))
+ifneq (,$(wildcard $@/Makefile)) # If there's a Makefile in $@.
+	make -C $@ get-deps
+else
+	cd $@ && rebar get-deps
+endif
 
 clean-deps:
 	$(foreach dep,$(wildcard deps/*/),make -C $(dep) clean;)
@@ -22,7 +27,10 @@ deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
 	mkdir -p deps/
 
 deps: get-deps
-	$(foreach dep,$(wildcard deps/*/),make -C $(dep) all;)
+	$(foreach dep,$(wildcard deps/*/), \
+            $(if $(wildcard $(dep)/Makefile), \
+                make -C $(dep) all, \
+                cd $(dep) && rebar compile); )
 .PHONY: deps
 
 update-deps: get-deps
@@ -36,7 +44,7 @@ update-deps: get-deps
 ####
 
 ebin/%.beam: src/%.erl
-	erlc $(ERLCFLAGS) -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
+	erlc $(ERLCFLAGS) -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ -I deps/ $<
 
 ebin/%.beam: src/%.xrl
 	erlc -o ebin/ $<
