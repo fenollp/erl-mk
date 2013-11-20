@@ -18,10 +18,12 @@ deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
           #   ‘warning: ignoring old recipe for target `xxx'’
 	mkdir -p deps/
 
+# Rewrite using 'deps/%/ebin/' when empty dir
 clean-deps:
 	$(foreach dep,$(wildcard deps/*/),make -C $(dep) clean;)
 .PHONY: clean-deps
 
+# Rewrite using dependency on 'deps/%/ebin/%.beam'
 deps: get-deps
 	$(foreach dep,$(wildcard deps/*/), \
             $(if $(wildcard $(dep)/Makefile), \
