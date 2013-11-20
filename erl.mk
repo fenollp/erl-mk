@@ -22,8 +22,8 @@ deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
 clean-deps:
 	$(foreach dep,$(wildcard deps/*/), \
             $(if $(wildcard $(dep)/Makefile), \
-                make -C $(dep) clean, \
-                cd $(dep) && rebar clean;))
+                make -C $(dep) clean;, \
+                cd $(dep) && rebar clean && cd ../../;))
 .PHONY: clean-deps
 
 update-deps: deps
@@ -37,7 +37,7 @@ update-deps: deps
 #### APP
 
 ebin/%.beam: src/%.erl      | ebin/
-	erlc $(ERLCFLAGS) -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ -I deps/ $<
+	erlc $(ERLCFLAGS) -v -o ebin/ -Iinclude/ -Ideps/ $< -pa ebin/ -pa -- deps/*/ebin/
 
 ebin/%.beam: src/%.xrl      | ebin/
 	erlc -o ebin/ $<
@@ -48,10 +48,10 @@ ebin/%.beam: src/%.yrl      | ebin/
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S        | ebin/
-	erlc $(ERLCFLAGS) +from_asm -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
+	erlc $(ERLCFLAGS) +from_asm -v -o ebin/ -Iinclude/ -Ideps/ $< -pa ebin/ -pa -- deps/*/ebin/
 
 ebin/%.beam: src/%.core     | ebin/
-	erlc $(ERLCFLAGS) +from_core -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ $<
+	erlc $(ERLCFLAGS) +from_core -v -o ebin/ -Iinclude/ -Ideps/ $< -pa ebin/ -pa -- deps/*/ebin/
 
 ebin/%.app: src/%.app.src   | ebin/
 	cp $< $@
