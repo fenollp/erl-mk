@@ -1,11 +1,9 @@
 all: deps app
 .PHONY: all
 
-####
+#### DEPS
 
-ALL_DEPS_DIRS = $(addprefix deps/,$(DEPS))
-
-get-deps : deps-dir $(ALL_DEPS_DIRS)
+get-deps : deps-dir $(addprefix deps/,$(DEPS))
 .PHONY: get-deps
 
 deps/%/:
@@ -15,14 +13,14 @@ deps/%/:
             make -C $@ get-deps, \
             cd $@ && rebar get-deps)
 
-clean-deps:
-	$(foreach dep,$(wildcard deps/*/),make -C $(dep) clean;)
-.PHONY: clean-deps
-
 deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
           #   ‘warning: overriding recipe for target `xxx'’
           #   ‘warning: ignoring old recipe for target `xxx'’
 	mkdir -p deps/
+
+clean-deps:
+	$(foreach dep,$(wildcard deps/*/),make -C $(dep) clean;)
+.PHONY: clean-deps
 
 deps: get-deps
 	$(foreach dep,$(wildcard deps/*/), \
@@ -39,7 +37,7 @@ update-deps: get-deps
                          git checkout -q $(word 2,$(dep_$(dep)));)
 .PHONY: update-deps
 
-####
+#### APP
 
 ebin/%.beam: src/%.erl
 	erlc $(ERLCFLAGS) -v -o ebin/ -pa ebin/ -pa deps/*/ebin/ -I include/ -I deps/ $<
@@ -76,6 +74,8 @@ ebin/:
 clean: clean-deps
 	rm -rf ebin/
 .PHONY: clean
+
+#### DISTCLEAN
 
 distclean:
 	rm -rf ebin/ deps/
