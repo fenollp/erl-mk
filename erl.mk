@@ -20,7 +20,7 @@ deps/%/: | deps-dir
 deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
           #   ‘warning: overriding recipe for target `xxx'’
           #   ‘warning: ignoring old recipe for target `xxx'’
-	  #   SO: http://stackoverflow.com/q/20119411/1418165
+          #   SO: http://stackoverflow.com/q/20119411/1418165
 	$(if $(wildcard deps/),,mkdir deps/)
 
 clean-deps: # Use update-deps to recompile deps after clean-deps.
@@ -36,8 +36,8 @@ update-deps: deps
                                              git fetch origin && \
                                       git fetch --tags origin && \
                       git checkout -q $(word 2,$(dep_$(dep))) && \
+  if [[ -f ./Makefile ]]; then make; else rebar compile skip_deps=true; fi && \
                                                       cd ../../; )
-# TODO: recompile
 .PHONY: update-deps
 
 #### APP
