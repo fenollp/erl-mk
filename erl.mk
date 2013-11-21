@@ -81,6 +81,6 @@ clean: clean-deps
 
 #### DISTCLEAN
 
-distclean:
+distclean: clean
 	$(if $(wildcard deps/),rm -rf deps/)
 .PHONY: distclean
