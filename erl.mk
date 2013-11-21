@@ -75,11 +75,11 @@ ebin/:
 	mkdir ebin/
 
 clean: clean-deps
-	rm -rf ebin/
+	$(if $(wildcard ebin/),rm -r ebin/)
 .PHONY: clean
 
 #### DISTCLEAN
 
 distclean:
-	rm -rf ebin/ deps/
+	$(if $(wildcard deps/),rm -r deps/)
 .PHONY: distclean
