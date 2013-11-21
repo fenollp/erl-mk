@@ -20,9 +20,10 @@ deps/%/: | deps-dir
 deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
           #   ‘warning: overriding recipe for target `xxx'’
           #   ‘warning: ignoring old recipe for target `xxx'’
+	  #   SO: http://stackoverflow.com/q/20119411/1418165
 	$(if $(wildcard deps/),,mkdir deps/)
 
-clean-deps:
+clean-deps: # Use update-deps to recompile deps after clean-deps.
 	$(foreach dep,$(wildcard deps/*/), \
             $(if $(wildcard $(dep)/Makefile), \
                 make -C $(dep) clean;, \
@@ -75,7 +76,7 @@ app: $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src)) \
 ebin/:
 	mkdir ebin/
 
-clean: clean-deps
+clean:
 	$(if $(wildcard ebin/),rm -r ebin/)
 .PHONY: clean
 
