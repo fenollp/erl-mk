@@ -6,15 +6,18 @@ all: deps app
 deps : $(patsubst %,deps/%/,$(DEPS))
 	$(if $(wildcard deps/*/deps/), \
 	    mv -v deps/*/deps/* deps/ && rmdir $(wildcard deps/*/deps/))
+	$(foreach dep,$(wildcard deps/*), \
+	    $(if $(wildcard $@/deps),, \
+	        cd $(dep) && ln -s ../../deps/ deps && cd ../..))
 .PHONY: deps
 
 deps/%/: | deps-dir
 	$(if $(wildcard $@/.git/),, \
 	    git clone -n -- $(word 1,$(dep_$*)) $@ && \
-	        cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../../)
+	        cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../..)
 	$(if $(wildcard $@/Makefile), \
 	    make -C $@ all, \
-	    cd $@ && rebar get-deps compile && cd ../../)
+	    cd $@ && rebar get-deps compile && cd ../..)
 #.PHONY: deps/%/
 
 deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
@@ -27,17 +30,17 @@ clean-deps: # Use update-deps to recompile deps after clean-deps.
 	$(foreach dep,$(wildcard deps/*/), \
             $(if $(wildcard $(dep)/Makefile), \
                 make -C $(dep) clean;, \
-                cd $(dep) && rebar clean && cd ../../;))
+                cd $(dep) && rebar clean && cd ../..;))
 .PHONY: clean-deps
 
 update-deps: deps
 	$(foreach dep,$(patsubst deps/%/,%,$(wildcard deps/*/)), \
-                                              cd deps/$(dep)/ && \
+                                               cd deps/$(dep) && \
                                              git fetch origin && \
                                       git fetch --tags origin && \
                       git checkout -q $(word 2,$(dep_$(dep))) && \
   if [[ -f ./Makefile ]]; then make; else rebar compile skip_deps=true; fi && \
-                                                      cd ../../; )
+                                                     cd ../..  ; )
 .PHONY: update-deps
 
 #### APP
