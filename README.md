@@ -23,7 +23,7 @@ Now, `make -j 5`. This is the parallel exquivalent of `rebar get-deps compile`.
 except the packaging stuff, and also some of `rebar`'s commands.
 Thus the compiling and dependency handling commands are available, but not ‹paste TODO›.  
 
-You should be set with `all`, `clean` and `update-deps` `make` targets.
+You should be set with the `all` and `clean` `make` targets.
 
 Dependency specification is the same as **erlang.mk**'s.
 ```make
