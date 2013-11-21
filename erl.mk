@@ -4,7 +4,8 @@ all: deps app
 #### DEPS
 
 deps : $(patsubst %,deps/%/,$(DEPS))
-	$(if $(wildcard deps/*/deps/*),mv -v deps/*/deps/* deps/)
+	$(if $(wildcard deps/*/deps/), \
+	    mv -v deps/*/deps/* deps/ && rmdir $(wildcard deps/*/deps/))
 .PHONY: deps
 
 deps/%/: | deps-dir
