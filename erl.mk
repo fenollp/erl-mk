@@ -52,8 +52,11 @@ ebin/:
 
 #### EUNIT -- Compiles test/ into ebin/ and runs EUnit tests.
 
-eunit: all
+eunit: all $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*.erl))
 .PHONY: eunit
+
+ebin/%.beam: test/%.erl     | ebin/
+	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -I include/ -I deps/ $<
 
 #### CLEAN -- Removes ebin/
 
