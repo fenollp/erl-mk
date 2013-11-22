@@ -53,6 +53,8 @@ ebin/:
 #### EUNIT -- Compiles test/ into ebin/ and runs EUnit tests.
 
 eunit: all $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*.erl))
+	$(foreach m,$(patsubst test/%.erl,%,$(wildcard test/*.erl)), \
+	    erl -noshell -eval 'io:format("Module '$(m)':\n").' -eval 'eunit:test('$(m)').' -pa ebin/ -pa deps/*/ebin/ -s init stop;)
 .PHONY: eunit
 
 ebin/%.beam: test/%.erl     | ebin/
