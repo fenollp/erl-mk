@@ -28,7 +28,7 @@ app: $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src)) \
 .PHONY: app
 
 ebin/%.beam: src/%.erl      | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v -I include/ -I deps/ $<
+	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 
 ebin/%.beam: src/%.xrl      | ebin/
 	erlc -o ebin/ $<
@@ -39,10 +39,10 @@ ebin/%.beam: src/%.yrl      | ebin/
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S        | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -I include/ -I deps/ $<
+	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -Iinclude/ -Ideps/ $<
 
 ebin/%.beam: src/%.core     | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -I include/ -I deps/ $<
+	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -Ideps/ $<
 
 ebin/%.app: src/%.app.src   | ebin/
 	cp $< $@
@@ -56,7 +56,7 @@ eunit: all $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*.erl))
 .PHONY: eunit
 
 ebin/%.beam: test/%.erl     | ebin/
-	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -I include/ -I deps/ $<
+	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 
 #### CLEAN -- Removes ebin/
 
