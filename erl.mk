@@ -1,7 +1,7 @@
 all: deps app
 .PHONY: all
 
-#### DEPS -- Fetches then compiles deps recursively & moves every dep to deps/
+#### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
 
 deps : $(patsubst %,deps/%/,$(DEPS))
 	$(if $(wildcard deps/*/deps/), \
@@ -18,10 +18,8 @@ deps/%/:
 
 #### APP -- Compiles src/ into ebin/
 
-ERLC_INCLUDES = -I include/ -I deps/ -I ../../
-
 ebin/%.beam: src/%.erl      | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v $(ERLC_INCLUDES) $<
+	erlc -o ebin/ $(ERLCFLAGS) -v -I include/ -I deps/ $<
 
 ebin/%.beam: src/%.xrl      | ebin/
 	erlc -o ebin/ $<
@@ -32,10 +30,10 @@ ebin/%.beam: src/%.yrl      | ebin/
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S        | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) +from_asm -v $(ERLC_INCLUDES) $<
+	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -I include/ -I deps/ $<
 
 ebin/%.beam: src/%.core     | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) +from_core -v $(ERLC_INCLUDES) $<
+	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -I include/ -I deps/ $<
 
 ebin/%.app: src/%.app.src   | ebin/
 	cp $< $@
