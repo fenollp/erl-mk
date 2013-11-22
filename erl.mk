@@ -52,15 +52,17 @@ ebin/:
 
 #### EUNIT -- Compiles test/ into ebin/ and runs EUnit tests.
 
-eunit: $(patsubst test/%.erl, eunit_it/%, $(wildcard test/*.erl))
+eunit: $(patsubst test/%.erl, eunit-%, $(wildcard test/*.erl))
 .PHONY: eunit
+
+eunit-%: ebin/%.beam        | all
+	erl -noshell -eval 'io:format("Module '$*':\n"), eunit:test('$*').' \
+    -pa ebin/ -pa deps/*/ebin/ -s init stop
+.PHONY: eunit-%
 
 ebin/%.beam: test/%.erl     | ebin/
 	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
-
-eunit_it/%: ebin/%.beam     | all
-	erl -noshell -eval 'io:format("Module '$*':\n"), eunit:test('$*').' \
-    -pa ebin/ -pa deps/*/ebin/ -s init stop
+.PRECIOUS: ebin/%.beam
 
 #### CLEAN -- Removes ebin/
 
