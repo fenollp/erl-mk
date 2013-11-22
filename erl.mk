@@ -27,7 +27,7 @@ deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
 ERLC_INCLUDES = -I include/ -I deps/ -I ../../
 
 ebin/%.beam: src/%.erl      | ebin/
-	erlc $(ERLCFLAGS) -v -o ebin/ $(ERLC_INCLUDES) $<
+	erlc -o ebin/ $(ERLCFLAGS) -v $(ERLC_INCLUDES) $<
 
 ebin/%.beam: src/%.xrl      | ebin/
 	erlc -o ebin/ $<
@@ -38,10 +38,10 @@ ebin/%.beam: src/%.yrl      | ebin/
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S        | ebin/
-	erlc $(ERLCFLAGS) +from_asm -v -o ebin/ $(ERLC_INCLUDES) $<
+	erlc -o ebin/ $(ERLCFLAGS) +from_asm -v $(ERLC_INCLUDES) $<
 
 ebin/%.beam: src/%.core     | ebin/
-	erlc $(ERLCFLAGS) +from_core -v -o ebin/ $(ERLC_INCLUDES) $<
+	erlc -o ebin/ $(ERLCFLAGS) +from_core -v $(ERLC_INCLUDES) $<
 
 ebin/%.app: src/%.app.src   | ebin/
 	cp $< $@
