@@ -1,28 +1,22 @@
 all: deps app
 .PHONY: all
 
-#### DEPS
+#### DEPS -- Fetches then compiles deps recursively & moves every dep to deps/
 
 deps : $(patsubst %,deps/%/,$(DEPS))
 	$(if $(wildcard deps/*/deps/), \
 	    mv -v deps/*/deps/* deps/ && rmdir $(wildcard deps/*/deps/))
 .PHONY: deps
 
-deps/%/: | deps-dir
-	$(if $(wildcard $@/.git/),, \
-	    git clone -n -- $(word 1,$(dep_$*)) $@ && \
-	        cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../..)
+deps/%/:
+	$(if $(wildcard deps/),,mkdir deps/)
+	git clone -n -- $(word 1,$(dep_$*)) $@
+	cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../..
 	$(if $(wildcard $@/Makefile), \
 	    make -C $@ all, \
 	    cd $@ && rebar get-deps compile && cd ../..)
 
-deps-dir: # Weird: Could not name target 'deps/' b/c of other target 'deps':
-          #   ‘warning: overriding recipe for target `xxx'’
-          #   ‘warning: ignoring old recipe for target `xxx'’
-          #   SO: http://stackoverflow.com/q/20119411/1418165
-	$(if $(wildcard deps/),,mkdir deps/)
-
-#### APP
+#### APP -- Compiles src/ into ebin/
 
 ERLC_INCLUDES = -I include/ -I deps/ -I ../../
 
@@ -58,13 +52,17 @@ app: $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src)) \
 ebin/:
 	mkdir ebin/
 
-#### CLEAN
+#### EUNIT -- Compiles test/ into ebin/ and runs EUnit tests.
+
+
+
+#### CLEAN -- Removes ebin/
 
 clean:
 	$(if $(wildcard ebin/),rm -r ebin/)
 .PHONY: clean
 
-#### DISTCLEAN
+#### DISTCLEAN -- Removes ebin/ & deps/
 
 distclean: clean
 	$(if $(wildcard deps/),rm -rf deps/)
