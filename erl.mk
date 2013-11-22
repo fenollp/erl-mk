@@ -18,6 +18,15 @@ deps/%/:
 
 #### APP -- Compiles src/ into ebin/
 
+app: $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src)) \
+     $(patsubst src/%.erl,    ebin/%.beam,$(wildcard src/*.erl    )) \
+     $(patsubst src/%.xrl,    ebin/%.beam,$(wildcard src/*.xrl    )) \
+     $(patsubst src/%.yrl,    ebin/%.beam,$(wildcard src/*.yrl    )) \
+     $(patsubst src/%.S,      ebin/%.beam,$(wildcard src/*.S      )) \
+     $(patsubst src/%.core,   ebin/%.beam,$(wildcard src/*.core   ))
+#	echo $?
+.PHONY: app
+
 ebin/%.beam: src/%.erl      | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v -I include/ -I deps/ $<
 
@@ -38,21 +47,13 @@ ebin/%.beam: src/%.core     | ebin/
 ebin/%.app: src/%.app.src   | ebin/
 	cp $< $@
 
-app: $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src)) \
-     $(patsubst src/%.erl,    ebin/%.beam,$(wildcard src/*.erl    )) \
-     $(patsubst src/%.xrl,    ebin/%.beam,$(wildcard src/*.xrl    )) \
-     $(patsubst src/%.yrl,    ebin/%.beam,$(wildcard src/*.yrl    )) \
-     $(patsubst src/%.S,      ebin/%.beam,$(wildcard src/*.S      )) \
-     $(patsubst src/%.core,   ebin/%.beam,$(wildcard src/*.core   ))
-#	echo $?
-.PHONY: app
-
 ebin/:
 	mkdir ebin/
 
 #### EUNIT -- Compiles test/ into ebin/ and runs EUnit tests.
 
-
+eunit: all
+.PHONY: eunit
 
 #### CLEAN -- Removes ebin/
 
