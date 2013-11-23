@@ -53,20 +53,19 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make distclean` | Remove `ebin/` and `deps/`                                  |
 
 ## Differences with erlang.mk
-* Makes use of `make`'s fast dependency graph, `make -j` works.
+* Makes use of `make`'s fast dependency graph and parallelisation
 * Much simpler design (as far as Makefiles go)
 * No PROJECT variable needed, does not depend on wget
 
 ## TODO
-**erl.mk** is meant to replace **erlang.mk** and `rebar`'s compile commands. However, one should still use `rebar` and `relx`.
+**erl.mk** is meant to replace **erlang.mk** and `rebar`'s compile commands. However, one should still use `rebar` and `relx` for something other than compilation.
 * Implement `doc` target
-* Add `rebar`-style `eunit` target
 * Support the generic arch (eg. apps/, …)
 * Implement **erlang.mk**'s behaviour on
-	* common test
-	* test deps
+	* `ct` target
+	* test deps (nah, use git submodules for that)
 	* compiling dtl files
-	* support options and ENV variables
+	* support verbose toggle
 
 ## ¬TODO
 * `relx`|`rebar` download tool | wrapper
