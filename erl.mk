@@ -24,7 +24,6 @@ app: $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src)) \
      $(patsubst src/%.yrl,    ebin/%.beam,$(wildcard src/*.yrl    )) \
      $(patsubst src/%.S,      ebin/%.beam,$(wildcard src/*.S      )) \
      $(patsubst src/%.core,   ebin/%.beam,$(wildcard src/*.core   ))
-#	echo $?
 .PHONY: app
 
 ebin/%.beam: src/%.erl      | ebin/
