@@ -56,6 +56,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 * Makes use of `make`'s fast dependency graph and parallelisation
 * Much simpler design (as far as Makefiles go)
 * No PROJECT variable needed, does not depend on wget
+* Uses relative paths, thus no trouble with folders' name containing whitespaces
 
 ## TODO
 **erl.mk** is meant to replace **erlang.mk** and `rebar`'s compile commands. However, one should still use `rebar` and `relx` for something other than compilation.
@@ -63,7 +64,6 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 * Support the generic arch (eg. apps/, …)
 * Implement **erlang.mk**'s behaviour on
 	* `ct` target
-	* test deps (nah, use git submodules for that)
 	* compiling dtl files
 	* support verbose toggle
 
