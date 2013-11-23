@@ -23,7 +23,7 @@ Now, `make -j 5`. This is the parallel exquivalent of `rebar get-deps compile`.
 except the packaging stuff, and also some of `rebar`'s commands.
 Thus the compiling and dependency handling commands are available, but not ‹paste TODO›.  
 
-You should be set with the `all` and `clean` `make` targets.
+You should be all set with `make`, `make clean` and `make eunit`.
 
 Dependency specification is the same as **erlang.mk**'s.
 ```make
@@ -32,7 +32,27 @@ dep_cowboy = https://github.com/extend/cowboy.git 0.8.4
 dep_bullet = https://github.com/extend/bullet.git 0.4.1
 ```
 
-### Differences with erlang.mk
+### Compilation support
+| Pattern         | File type            |
+| --------------- | -------------------- |
+| `src/*.app.src` | Application resource |
+| `src/*.erl`     | Erlang code          |
+| `src/*.xrl`     | LEEX code            |
+| `src/*.yrl`     | YECC code            |
+| `src/*.core`    | Erlang Core code     |
+| `src/*.S`       | Erlang ASM code      |
+
+### API
+| `make` target    | Action                                                      |
+| ---------------- | ----------------------------------------------------------- |
+| `make all`       | ⇔ `make deps app`                                           |
+| `make deps`      | Fetch & compile dependencies and deps of deps, into `deps/` |
+| `make app`       | Compile files from `src/`                                   |
+| `make eunit`     | Compile & EUnit-test files in `test/*_tests.erl`            |
+| `make clean`     | Remove `ebin/`                                              |
+| `make distclean` | Remove `ebin/` and `deps/`                                  |
+
+## Differences with erlang.mk
 * Makes use of `make`'s fast dependency graph, `make -j` works.
 * Much simpler design (as far as Makefiles go)
 * No PROJECT variable needed, does not depend on wget
