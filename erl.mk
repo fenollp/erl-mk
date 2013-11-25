@@ -53,7 +53,7 @@ ebin/:
 
 eunit: $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*_tests.erl))
 	@$(foreach m,$(patsubst test/%_tests.erl,%_tests,$(wildcard test/*_tests.erl)), \
-	    erl -noshell -eval 'io:format("Module '$(m)':\n"), eunit:test('$(m)').' \
+	    erl -noshell -eval 'io:format("Module $(m):\n"), eunit:test($(m)).' \
 	        -pa ebin/ -pa deps/*/ebin/ -s init stop;)
 .PHONY: eunit
 
