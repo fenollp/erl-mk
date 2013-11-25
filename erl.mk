@@ -1,7 +1,7 @@
 all: deps app
 .PHONY: all
 
-#### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
+### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
 
 deps : $(patsubst %,deps/%/,$(DEPS))
 	$(if $(wildcard deps/*/deps/), \
@@ -16,7 +16,7 @@ deps/%/:
 	    make -C $@ all, \
 	    cd $@ && rebar get-deps compile && cd ../..)
 
-#### APP -- Compiles src/ into ebin/
+### APP -- Compiles src/ into ebin/
 
 app: $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src)) \
      $(patsubst src/%.erl,    ebin/%.beam,$(wildcard src/*.erl    )) \
@@ -49,7 +49,7 @@ ebin/%.app: src/%.app.src   | ebin/
 ebin/:
 	mkdir ebin/
 
-#### EUNIT -- Compiles test/ into ebin/ and runs EUnit tests.
+### EUNIT -- Compiles test/ into ebin/ and runs EUnit tests.
 
 eunit: $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*_tests.erl))
 	@$(foreach m,$(patsubst test/%_tests.erl,%_tests,$(wildcard test/*_tests.erl)), \
@@ -60,13 +60,13 @@ eunit: $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*_tests.erl))
 ebin/%_tests.beam: test/%_tests.erl     | all
 	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 
-#### CLEAN -- Removes ebin/
+### CLEAN -- Removes ebin/
 
 clean:
 	$(if $(wildcard ebin/),rm -r ebin/)
 .PHONY: clean
 
-#### DISTCLEAN -- Removes ebin/ & deps/
+### DISTCLEAN -- Removes ebin/ & deps/
 
 distclean: clean
 	$(if $(wildcard deps/),rm -rf deps/)
