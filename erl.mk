@@ -71,6 +71,7 @@ docs: $(foreach ext,app.src erl xrl yrl S core, $(wildcard src/*.$(ext))) \
              -eval 'io:format("Compiling documentation for $($@_APP).\n").' \
              -eval 'edoc:application($($@_APP), ".", [$(EDOC_OPTS)]).' \
              -s init stop
+.PHONY: docs
 
 ### CLEAN-DOCS -- Removes generated doc/ stuff.
 
@@ -80,6 +81,7 @@ clean-docs:
 	$(if $(wildcard doc/*.png),     rm doc/*.png)
 	$(if $(wildcard doc/edoc-info), rm doc/edoc-info)
 	$(if $(wildcard doc/*),,$(if $(wildcard doc/),rmdir doc/))
+.PHONY: clean-docs
 
 ### CLEAN -- Removes ebin/
 
@@ -89,6 +91,6 @@ clean:
 
 ### DISTCLEAN -- Removes ebin/ & deps/
 
-distclean: clean clean-doc
+distclean: clean clean-docs
 	$(if $(wildcard deps/),rm -rf deps/)
 .PHONY: distclean
