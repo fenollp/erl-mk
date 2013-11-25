@@ -60,6 +60,25 @@ eunit: $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*_tests.erl))
 ebin/%_tests.beam: test/%_tests.erl     | all
 	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 
+### DOCS -- Compiles the app's documentation into doc/
+
+docs: $(foreach ext,app.src erl xrl yrl S core, $(wildcard src/*.$(ext))) \
+                                                $(wildcard doc/overview.edoc)
+	$(eval $@_APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src)))
+	@erl -noshell \
+             -eval 'io:format("Compiling documentation for $($@_APP).\n").' \
+             -eval 'edoc:application($($@_APP), ".", [$(EDOC_OPTS)]).' \
+             -s init stop
+
+### CLEAN-DOCS -- Removes generated doc/ stuff.
+
+clean-docs:
+	$(if $(wildcard doc/*.css),     rm doc/*.css)
+	$(if $(wildcard doc/*.html),    rm doc/*.html)
+	$(if $(wildcard doc/*.png),     rm doc/*.png)
+	$(if $(wildcard doc/edoc-info), rm doc/edoc-info)
+	$(if $(wildcard doc/*),,$(if $(wildcard doc/),rmdir doc/))
+
 ### CLEAN -- Removes ebin/
 
 clean:
@@ -68,6 +87,6 @@ clean:
 
 ### DISTCLEAN -- Removes ebin/ & deps/
 
-distclean: clean
+distclean: clean clean-doc
 	$(if $(wildcard deps/),rm -rf deps/)
 .PHONY: distclean
