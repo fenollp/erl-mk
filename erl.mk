@@ -89,7 +89,7 @@ clean-docs:
 	$(if $(wildcard doc/*.html),    rm doc/*.html)
 	$(if $(wildcard doc/*.png),     rm doc/*.png)
 	$(if $(wildcard doc/edoc-info), rm doc/edoc-info)
-	$(if $(wildcard doc/*),,$(if $(wildcard doc/),rmdir doc/))
+	@[[ -d doc/ ]] && [[ 'doc/*' = "`echo doc/*`" ]] && rmdir doc/ || true
 .PHONY: clean-docs
 
 ### CLEAN -- Removes ebin/
