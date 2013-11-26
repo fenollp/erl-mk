@@ -12,7 +12,7 @@ include erl.mk
 # Your targets after this line.
 ```
 
-Now, `make -j 5`. This is the parallel exquivalent of `rebar get-deps compile`.
+Now, `make -j`. This is the parallel exquivalent of `rebar -j get-deps compile`.
 
 ## Why?
 * `rebar` is too slow for a tight dev-fail loop.
@@ -63,11 +63,9 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 
 ## TODO
 **erl.mk** is meant to replace **erlang.mk** and `rebar`'s compile commands. However, one should still use `rebar` and `relx` for something other than compilation.
-* Implement `doc` target
 * Support the generic arch (eg. apps/, …)
 * Implement **erlang.mk**'s behaviour on
 	* `ct` target
-	* compiling dtl files
 	* support verbose toggle
 
 ## ¬TODO
