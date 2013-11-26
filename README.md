@@ -5,7 +5,7 @@ Include this in your Makefile:
 all: erl.mk
 
 erl.mk:
-	wget 'https://raw.github.com/fenollp/erl-mk/master/erl.mk'
+	wget -O erl.mk 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm ./erl.mk
 
 include erl.mk
 
