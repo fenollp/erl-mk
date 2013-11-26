@@ -72,7 +72,6 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 ## ¬TODO
 * `relx`|`rebar` download tool | wrapper
 * Dialyzer wrapper
-* not achieve widespread usage
 
 # Contact
 Please [report issues](https://github.com/fenollp/erl-mk/issues) and do a lot of [Pull Requests](https://github.com/fenollp/erl-mk/pulls).
