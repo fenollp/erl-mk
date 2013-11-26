@@ -33,21 +33,22 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 ```
 
 ### Compilation support
-| Pattern         | File type            |
-| --------------- | -------------------- |
-| `src/*.app.src` | Application resource |
-| `src/*.erl`     | Erlang code          |
-| `src/*.xrl`     | LEEX code            |
-| `src/*.yrl`     | YECC code            |
-| `src/*.core`    | Erlang Core code     |
-| `src/*.S`       | Erlang ASM code      |
+| Pattern           | File type            |
+| ----------------- | -------------------- |
+| `src/*.app.src`   | Application resource |
+| `src/*.erl`       | Erlang code          |
+| `src/*.xrl`       | LEEX code            |
+| `src/*.yrl`       | YECC code            |
+| `src/*.S`         | Erlang ASM code      |
+| `src/*.core`      | Erlang Core code     |
+| `templates/*.dtl` | ErlyDTL templates    |
 
 ### API
 | `make` target     | Action                                                      |
 | ----------------- | ----------------------------------------------------------- |
 | `make all`        | ⇔ `make deps app`                                           |
 | `make deps`       | Fetch & compile dependencies and deps of deps, into `deps/` |
-| `make app`        | Compile files from `src/`                                   |
+| `make app`        | Compile files from `src/` | `templates/`                    |
 | `make eunit`      | Compile & EUnit-test files in `test/*_tests.erl`            |
 | `make docs`       | Generate the app's documentation into `doc/`                |
 | `make clean-docs` | Remove `doc/{edoc-info,*.{css,html,png}}`                   |

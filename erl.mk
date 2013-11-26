@@ -18,33 +18,41 @@ deps/%/:
 
 ### APP -- Compiles src/ into ebin/
 
-app: $(patsubst src/%.app.src,ebin/%.app, $(wildcard src/*.app.src)) \
-     $(patsubst src/%.erl,    ebin/%.beam,$(wildcard src/*.erl    )) \
-     $(patsubst src/%.xrl,    ebin/%.beam,$(wildcard src/*.xrl    )) \
-     $(patsubst src/%.yrl,    ebin/%.beam,$(wildcard src/*.yrl    )) \
-     $(patsubst src/%.S,      ebin/%.beam,$(wildcard src/*.S      )) \
-     $(patsubst src/%.core,   ebin/%.beam,$(wildcard src/*.core   ))
+app: $(patsubst src/%.app.src,  ebin/%.app,     $(wildcard src/*.app.src  )) \
+     $(patsubst src/%.erl,      ebin/%.beam,    $(wildcard src/*.erl      )) \
+     $(patsubst src/%.xrl,      ebin/%.beam,    $(wildcard src/*.xrl      )) \
+     $(patsubst src/%.yrl,      ebin/%.beam,    $(wildcard src/*.yrl      )) \
+     $(patsubst src/%.S,        ebin/%.beam,    $(wildcard src/*.S        )) \
+     $(patsubst src/%.core,     ebin/%.beam,    $(wildcard src/*.core     )) \
+     $(patsubst templates/%.dtl,ebin/%_dtl.beam,$(wildcard templates/*.dtl))
 .PHONY: app
 
-ebin/%.beam: src/%.erl      | ebin/
+ebin/%.app: src/%.app.src    | ebin/
+	cp $< $@
+
+ebin/%.beam: src/%.erl       | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 
-ebin/%.beam: src/%.xrl      | ebin/
+ebin/%.beam: src/%.xrl       | ebin/
 	erlc -o ebin/ $<
 	erlc -o ebin/ ebin/$*.erl
 
-ebin/%.beam: src/%.yrl      | ebin/
+ebin/%.beam: src/%.yrl       | ebin/
 	erlc -o ebin/ $<
 	erlc -o ebin/ ebin/$*.erl
 
-ebin/%.beam: src/%.S        | ebin/
+ebin/%.beam: src/%.S         | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -Iinclude/ -Ideps/ $<
 
-ebin/%.beam: src/%.core     | ebin/
+ebin/%.beam: src/%.core      | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -Ideps/ $<
 
-ebin/%.app: src/%.app.src   | ebin/
-	cp $< $@
+ebin/%_dtl.beam: templates/%.dtl | ebin/
+	$(if $(wildcard deps/erlydtl/),,$(error $<: deps/erlydtl/ not found))
+	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
+	     -eval 'io:format("Compiling ErlyDTL template $*\n").' \
+	     -eval 'erlydtl:compile("$<", $*_dtl, [{out_dir,"ebin/"}]).' \
+	     -s init stop
 
 ebin/:
 	mkdir ebin/
@@ -54,9 +62,9 @@ ebin/:
 eunit: $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*_tests.erl))
 	@$(foreach m, \
             $(patsubst test/%_tests.erl,%_tests,$(wildcard test/*_tests.erl)),\
-	    erl -noshell \
+	    erl -noshell -pa ebin/ -pa deps/*/ebin/ \
 	        -eval 'io:format("Module $(m):\n"), eunit:test($(m)).' \
-	        -pa ebin/ -pa deps/*/ebin/ -s init stop;)
+	        -s init stop;)
 .PHONY: eunit
 
 ebin/%_tests.beam: test/%_tests.erl     | all
@@ -68,9 +76,9 @@ docs: $(foreach ext,app.src erl xrl yrl S core, $(wildcard src/*.$(ext))) \
                                                 $(wildcard doc/overview.edoc)
 	$(eval $@_APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src)))
 	@erl -noshell \
-             -eval 'io:format("Compiling documentation for $($@_APP).\n").' \
-             -eval 'edoc:application($($@_APP), ".", [$(EDOC_OPTS)]).' \
-             -s init stop
+	     -eval 'io:format("Compiling documentation for $($@_APP).\n").' \
+	     -eval 'edoc:application($($@_APP), ".", [$(EDOC_OPTS)]).' \
+	     -s init stop
 .PHONY: docs
 
 ### CLEAN-DOCS -- Removes generated doc/ stuff.
