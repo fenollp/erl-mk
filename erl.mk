@@ -58,7 +58,7 @@ ebin/%_dtl.beam: templates/%.dtl | ebin/
 ebin/:
 	mkdir ebin/
 
-### EUNIT -- Compiles test/ into ebin/ and runs EUnit tests.
+### EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files).
 
 eunit: $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*_tests.erl))
 	@$(foreach m, \
@@ -70,6 +70,22 @@ eunit: $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*_tests.erl))
 
 ebin/%_tests.beam: test/%_tests.erl     | all
 	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+
+### CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl).
+
+ct: $(patsubst test/%_SUITE.erl,ct.%,$(wildcard test/*_SUITE.erl))
+.PHONY: ct
+
+ebin/%_SUITE.beam: test/%_SUITE.erl   | ebin/
+	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+.PRECIOUS: ebin/%_SUITE.beam
+
+ct.%: ebin/%_SUITE.beam | logs/
+	ct_run -noshell -pa ebin/ -pa deps/*/ebin/ -dir test/ -logdir logs/ -no_auto_compile -suite $*_SUITE || true
+.PHONY: ct.%
+
+logs/:
+	mkdir logs/
 
 ### DOCS -- Compiles the app's documentation into doc/
 
@@ -102,4 +118,5 @@ clean:
 
 distclean: clean clean-docs
 	$(if $(wildcard deps/),rm -rf deps/)
+	$(if $(wildcard logs/),rm -rf logs/)
 .PHONY: distclean
