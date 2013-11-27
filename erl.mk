@@ -70,7 +70,7 @@ eunit.%: #ebin/%_tests.beam
 	     -s init stop
 .PHONY: eunit.%
 
-#ebin/%_tests.beam: test/%_tests.erl     | all
+#ebin/%_tests.beam: test/%_tests.erl     | all #TODO fix something so that this can be used instead of the @erlc line above
 #	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 #.PRECIOUS: ebin/%_tests.beam
 
@@ -80,7 +80,11 @@ ct: $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.erl))
 .PHONY: ct
 
 ct.%: ebin/%_SUITE.beam                 | logs/
-	ct_run -noshell -pa ebin/ -pa deps/*/ebin/ -dir test/ -logdir logs/ -no_auto_compile -suite $*_SUITE || true
+#	Todo: use -no_auto_compile and ebin/%_SUITE.beam properly.
+	@ct_run -noshell \
+	        -pa ebin/ -pa $(wildcard $(shell pwd)/deps/*/ebin/) \
+	        -dir test/ -logdir logs/ \
+	        -suite $*_SUITE || true
 .PHONY: ct.%
 
 ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/
