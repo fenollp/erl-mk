@@ -31,6 +31,7 @@ DEPS = cowboy bullet
 dep_cowboy = https://github.com/extend/cowboy.git 0.8.4
 dep_bullet = https://github.com/extend/bullet.git 0.4.1
 ```
+…and that's all you'll have to put in your Makefile. Ever.
 
 ### Compilation support
 | Pattern           | File type            |
@@ -58,6 +59,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 
 ## Differences with erlang.mk
 * Compatible with deps that use a Makefile or `rebar`
+* Automatic discovery of files given that project respects OTP directory structure
 * Makes use of `make`'s fast dependency graph and parallelisation
 * Much simpler design (as far as Makefiles go)
 * No PROJECT variable needed, does not depend on wget
