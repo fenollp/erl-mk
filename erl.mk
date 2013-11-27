@@ -60,29 +60,31 @@ ebin/:
 
 ### EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files).
 
-eunit: $(patsubst test/%.erl, ebin/%.beam, $(wildcard test/*_tests.erl))
-	@$(foreach m, \
-            $(patsubst test/%_tests.erl,%_tests,$(wildcard test/*_tests.erl)),\
-	    erl -noshell -pa ebin/ -pa deps/*/ebin/ \
-	        -eval 'io:format("Module $(m):\n"), eunit:test($(m)).' \
-	        -s init stop;)
+eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
 .PHONY: eunit
+
+eunit.%: ebin/%_tests.beam
+	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
+	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
+	     -s init stop
+.PHONY: eunit.%
 
 ebin/%_tests.beam: test/%_tests.erl     | all
 	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+.PRECIOUS: ebin/%_tests.beam
 
 ### CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl).
 
-ct: $(patsubst test/%_SUITE.erl,ct.%,$(wildcard test/*_SUITE.erl))
+ct: $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.erl))
 .PHONY: ct
 
-ebin/%_SUITE.beam: test/%_SUITE.erl   | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
-.PRECIOUS: ebin/%_SUITE.beam
-
-ct.%: ebin/%_SUITE.beam | logs/
+ct.%: ebin/%_SUITE.beam                 | logs/
 	ct_run -noshell -pa ebin/ -pa deps/*/ebin/ -dir test/ -logdir logs/ -no_auto_compile -suite $*_SUITE || true
 .PHONY: ct.%
+
+ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/
+	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+.PRECIOUS: ebin/%_SUITE.beam
 
 logs/:
 	mkdir logs/
