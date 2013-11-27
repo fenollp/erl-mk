@@ -57,6 +57,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make distclean`  | Remove `ebin/` and `deps/`                                  |
 
 ## Differences with erlang.mk
+* Compatible with deps that use a Makefile or `rebar`
 * Makes use of `make`'s fast dependency graph and parallelisation
 * Much simpler design (as far as Makefiles go)
 * No PROJECT variable needed, does not depend on wget
