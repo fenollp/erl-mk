@@ -50,7 +50,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make deps`       | Fetch & compile dependencies and deps of deps, into `deps/` |
 | `make app`        | Compile files from `src/` | `templates/`                    |
 | `make eunit`      | Compile & EUnit-test files in `test/*_tests.erl`            |
-| `make eunit.Mod`  | Compile & EUnit-test code in `test/Module_tests.erl`        |
+| `make eunit.Mod`  | Compile & EUnit-test code in `test/Mod_tests.erl`           |
 | `make docs`       | Generate the app's documentation into `doc/`                |
 | `make clean-docs` | Remove `doc/{edoc-info,*.{css,html,png}}`                   |
 | `make clean`      | Remove `ebin/`                                              |
