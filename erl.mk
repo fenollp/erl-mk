@@ -81,9 +81,8 @@ ct: $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.erl))
 
 ct.%: ebin/%_SUITE.beam                 | logs/
 #	Todo: use -no_auto_compile and ebin/%_SUITE.beam properly.
-	@ct_run -noshell \
+	@ct_run -noshell -dir test/ -logdir logs/ \
 	        -pa ebin/ -pa $(wildcard $(shell pwd)/deps/*/ebin/) \
-	        -dir test/ -logdir logs/ \
 	        -suite $*_SUITE || true
 .PHONY: ct.%
 

@@ -34,15 +34,17 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 …and that's all you'll have to put in your Makefile. Ever.
 
 ### Compilation support
-| Pattern           | File type            |
-| ----------------- | -------------------- |
-| `src/*.app.src`   | Application resource |
-| `src/*.erl`       | Erlang code          |
-| `src/*.xrl`       | LEEX code            |
-| `src/*.yrl`       | YECC code            |
-| `src/*.S`         | Erlang ASM code      |
-| `src/*.core`      | Erlang Core code     |
-| `templates/*.dtl` | ErlyDTL templates    |
+| Pattern            | File type            |
+| ------------------ | -------------------- |
+| `src/*.app.src`    | Application resource |
+| `src/*.erl`        | Erlang code          |
+| `src/*.xrl`        | LEEX code            |
+| `src/*.yrl`        | YECC code            |
+| `src/*.S`          | Erlang ASM code      |
+| `src/*.core`       | Erlang Core code     |
+| `templates/*.dtl`  | ErlyDTL templates    |
+| `test/*_tests.erl` | EUnit tests          |
+| `test/*_SUITE.erl` | Common Test tests    |
 
 ### API
 | `make` target     | Action                                                      |
@@ -52,6 +54,8 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make app`        | Compile files from `src/` | `templates/`                    |
 | `make eunit`      | Compile & EUnit-test files in `test/*_tests.erl`            |
 | `make eunit.Mod`  | Compile & EUnit-test code in `test/Mod_tests.erl`           |
+| `make ct`         | Compile & EUnit-test files in `test/*_SUITE.erl`            |
+| `make ct.Mod`     | Compile & CommonTest-test code in `test/Mod_SUITE.erl`      |
 | `make docs`       | Generate the app's documentation into `doc/`                |
 | `make clean-docs` | Remove `doc/{edoc-info,*.{css,html,png}}`                   |
 | `make clean`      | Remove `ebin/`                                              |
@@ -68,9 +72,8 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 ## TODO
 **erl.mk** is meant to replace **erlang.mk** and `rebar`'s compile commands. However, one should still use `rebar` and `relx` for something other than compilation.
 * Support the generic arch (eg. apps/, …)
-* Implement **erlang.mk**'s behaviour on
-	* `ct` target
-	* support verbose toggle
+* Proper compilation of `ct` target's files (ie `-no_auto_compile` issue)
+* Do | Document the ≠ ENV variables available.
 
 ## ¬TODO
 * `relx`|`rebar` download tool | wrapper
