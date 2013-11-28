@@ -119,10 +119,3 @@ clean-docs:
 clean:
 	$(if $(wildcard ebin/),rm -r ebin/)
 .PHONY: clean
-
-### DISTCLEAN -- Removes ebin/ & deps/
-
-distclean: clean clean-docs
-	$(if $(wildcard deps/),rm -rf deps/)
-	$(if $(wildcard logs/),rm -rf logs/)
-.PHONY: distclean

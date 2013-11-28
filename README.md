@@ -7,6 +7,15 @@ all: erl.mk
 erl.mk:
 	wget -O erl.mk 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm ./erl.mk
 
+DEPS =
+
+
+distclean: clean clean-docs
+	$(if $(wildcard deps/ ), rm -rf deps/)
+	$(if $(wildcard logs/ ), rm -rf logs/)
+    $(if $(wildcard erl.mk), rm erl.mk   )
+.PHONY: distclean
+
 include erl.mk
 
 # Your targets after this line.
@@ -59,7 +68,6 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make docs`       | Generate the app's documentation into `doc/`                |
 | `make clean-docs` | Remove `doc/{edoc-info,*.{css,html,png}}`                   |
 | `make clean`      | Remove `ebin/`                                              |
-| `make distclean`  | Remove `ebin/` and `deps/`                                  |
 
 ## Differences with erlang.mk
 * Compatible with deps that use a Makefile or `rebar`
