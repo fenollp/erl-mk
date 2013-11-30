@@ -63,7 +63,8 @@ ebin/:
 eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
 .PHONY: eunit
 
-eunit.%: #ebin/%_tests.beam
+#eunit.%: ebin/%_tests.beam
+eunit.%:                                | all
 	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ test/$*_tests.erl
 	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
 	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
@@ -86,6 +87,8 @@ ct.%: ebin/%_SUITE.beam                 | logs/
 	        -suite $*_SUITE || true
 .PHONY: ct.%
 
+#todo: make ct depend on target all, and in a parallel-safe way.
+#ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/ all <-- this blocks if no ebin/
 ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 .PRECIOUS: ebin/%_SUITE.beam
