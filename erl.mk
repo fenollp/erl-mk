@@ -3,13 +3,15 @@ all: deps app
 
 ### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
 
-deps : $(patsubst %,deps/%/,$(DEPS))
+deps : $(patsubst %,deps/%/,$(DEPS))    | deps-dir
 	$(if $(wildcard deps/*/deps/), \
 	    mv -v deps/*/deps/* deps/ && rmdir $(wildcard deps/*/deps/))
 .PHONY: deps
 
-deps/%/:
+deps-dir:
 	$(if $(wildcard deps/),,mkdir deps/)
+
+deps/%/:
 	git clone -n -- $(word 1,$(dep_$*)) $@
 	cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../..
 	@if [[ -f $@/Makefile ]]; \
@@ -26,27 +28,27 @@ app: $(patsubst src/%.app.src,    ebin/%.app,  $(wildcard src/*.app.src)) \
      $(patsubst templates/%.dtl,  ebin/%_dtl.beam,$(wildcard templates/*.dtl))
 .PHONY: app
 
-ebin/%.app: src/%.app.src    | ebin/
+ebin/%.app: src/%.app.src               | ebin/
 	cp $< $@
 
-ebin/%.beam: src/%.erl       | ebin/
+ebin/%.beam: src/%.erl                  | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 
-ebin/%.beam: src/%.xrl       | ebin/
+ebin/%.beam: src/%.xrl                  | ebin/
 	erlc -o ebin/ $<
 	erlc -o ebin/ ebin/$*.erl
 
-ebin/%.beam: src/%.yrl       | ebin/
+ebin/%.beam: src/%.yrl                  | ebin/
 	erlc -o ebin/ $<
 	erlc -o ebin/ ebin/$*.erl
 
-ebin/%.beam: src/%.S         | ebin/
+ebin/%.beam: src/%.S                    | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -Iinclude/ -Ideps/ $<
 
-ebin/%.beam: src/%.core      | ebin/
+ebin/%.beam: src/%.core                 | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -Ideps/ $<
 
-ebin/%_dtl.beam: templates/%.dtl | ebin/
+ebin/%_dtl.beam: templates/%.dtl        | ebin/
 	$(if $(shell [[ ! -d deps/erlydtl ]] && echo y), \
 	    $(error Error compiling $<: deps/erlydtl/ not found))
 	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
