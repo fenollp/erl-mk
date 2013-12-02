@@ -12,9 +12,11 @@ deps/%/:
 	$(if $(wildcard deps/),,mkdir deps/)
 	git clone -n -- $(word 1,$(dep_$*)) $@
 	cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../..
-	$(if $(wildcard $@/Makefile), \
-	    make -C $@ all, \
-	    cd $@ && rebar get-deps compile && cd ../..)
+	@if [[ -f $@/Makefile ]]; \
+	then echo 'make -C $@ all' ; \
+	           make -C $@ all  ; \
+	else echo 'cd $@ && rebar get-deps compile && cd ../..' ; \
+	           cd $@ && rebar get-deps compile && cd ../..  ; fi
 
 ### APP -- Compiles src/ into ebin/
 
