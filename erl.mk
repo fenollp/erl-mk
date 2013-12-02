@@ -4,7 +4,7 @@ all: deps app
 ### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
 
 deps : $(patsubst %,deps/%/,$(DEPS))    | deps-dir
-	$(if $(wildcard deps/*/deps/), \
+	$(if $(shell [[ 'deps/*/deps/*' != "`echo deps/*/deps/*`" ]] && echo y), \
 	    mv -v deps/*/deps/* deps/ && rmdir $(wildcard deps/*/deps/))
 .PHONY: deps
 
