@@ -29,6 +29,7 @@ app: $(patsubst src/%.app.src,    ebin/%.app,  $(wildcard src/*.app.src)) \
 .PHONY: app
 
 ebin/%.app: src/%.app.src               | ebin/
+	@erl -noshell -eval '{ok,_} = file:consult("$<").' -s init stop
 	cp $< $@
 
 ebin/%.beam: src/%.erl                  | ebin/
