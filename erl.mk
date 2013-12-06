@@ -6,6 +6,7 @@ all: deps app
 deps : $(patsubst %,deps/%/,$(DEPS))    | deps-dir
 	$(if $(shell [[ 'deps/*/deps/*' != "`echo deps/*/deps/*`" ]] && echo y), \
 	    mv -v deps/*/deps/* deps/ && rmdir $(wildcard deps/*/deps/))
+	$(if $(shell [[ 'deps/*' == "`echo deps/*`" ]] && echo y),rmdir deps/)
 .PHONY: deps
 
 deps-dir:
