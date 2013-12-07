@@ -1,0 +1,12 @@
+{application, dummy_lib
+, [ {description, "An Erlang dummy_lib library"}
+  , {vsn, "1"}
+  , {modules, [
+              ]}
+  , {registered, []}
+  , {applications, [ kernel
+                   , stdlib
+                   ]}
+  , {env, []}
+  ]
+}.
