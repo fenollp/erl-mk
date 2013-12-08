@@ -1,7 +1,7 @@
 all: erl.mk
 
 erl.mk:
-	wget -nv -O erl.mk 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm ./erl.mk
+	wget -nv -O $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm ./$@
 
 DEPS = bullet
 dep_bullet = https://github.com/extend/bullet.git 0.4.1
