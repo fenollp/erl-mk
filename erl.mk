@@ -65,17 +65,15 @@ ebin/:
 eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
 .PHONY: eunit
 
-#eunit.%: ebin/%_tests.beam
-eunit.%:                                | all
-	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ test/$*_tests.erl
+eunit.%: ebin/%_tests.beam
 	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
 	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
 	     -s init stop
 .PHONY: eunit.%
 
-#ebin/%_tests.beam: test/%_tests.erl     | all #TODO fix something so that this can be used instead of the erlc line above
-#	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
-#.PRECIOUS: ebin/%_tests.beam
+ebin/%_tests.beam: test/%_tests.erl     | all
+	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+.PRECIOUS: ebin/%_tests.beam
 
 ### CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl).
 
