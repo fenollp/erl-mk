@@ -20,6 +20,21 @@ deps/%/:
 	else echo 'cd $@ && rebar get-deps compile && cd ../..' ; \
 	           cd $@ && rebar get-deps compile && cd ../..  ; fi
 
+### EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files).
+
+eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
+.PHONY: eunit
+
+eunit.%: ebin/%_tests.beam
+	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
+	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
+	     -s init stop
+.PHONY: eunit.%
+
+ebin/%_tests.beam: test/%_tests.erl     | all
+	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+.PRECIOUS: ebin/%_tests.beam
+
 ### APP -- Compiles src/ into ebin/
 
 app: $(patsubst src/%.app.src,    ebin/%.app,  $(wildcard src/*.app.src)) \
@@ -59,21 +74,6 @@ ebin/%_dtl.beam: templates/%.dtl        | ebin/
 
 ebin/:
 	mkdir ebin/
-
-### EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files).
-
-eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
-.PHONY: eunit
-
-eunit.%: ebin/%_tests.beam
-	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
-	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
-	     -s init stop
-.PHONY: eunit.%
-
-ebin/%_tests.beam: test/%_tests.erl     | all
-	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
-.PRECIOUS: ebin/%_tests.beam
 
 ### CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl).
 
