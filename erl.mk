@@ -98,6 +98,11 @@ ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/
 logs/:
 	mkdir logs/
 
+### ESCRIPTIZE -- Create a stand-alone EScript executable.
+
+escriptize: | all
+
+
 ### DOCS -- Compiles the app's documentation into doc/
 
 docs: $(foreach ext,app.src erl xrl yrl S core, $(wildcard src/*.$(ext))) \
