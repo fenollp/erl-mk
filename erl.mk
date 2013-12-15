@@ -98,10 +98,12 @@ ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/
 logs/:
 	mkdir logs/
 
-### ESCRIPTIZE -- Create a stand-alone EScript executable.
+### ESCRIPT -- Create a stand-alone EScript executable.
 
-escriptize: | all
-
+escript: | all
+	$(eval $@_APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src)))
+	# See rebar_escripter.erl:47-…
+	
 
 ### DOCS -- Compiles the app's documentation into doc/
 
