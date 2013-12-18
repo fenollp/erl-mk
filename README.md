@@ -12,12 +12,6 @@ DEPS =
 include erl.mk
 
 # Your targets after this line.
-
-distclean: clean clean-docs
-	$(if $(wildcard deps/ ), rm -rf deps/)
-	$(if $(wildcard logs/ ), rm -rf logs/)
-	$(if $(wildcard erl.mk), rm erl.mk   )
-.PHONY: distclean
 ```
 
 Now, `make -j`. This is the parallel exquivalent of `rebar -j get-deps compile`.
