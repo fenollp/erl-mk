@@ -28,6 +28,13 @@ app: $(patsubst src/%.app.src,    ebin/%.app,  $(wildcard src/*.app.src)) \
      $(patsubst templates/%.dtl,  ebin/%_dtl.beam,$(wildcard templates/*.dtl))
 .PHONY: app
 
+src/%.erl:  $(wildcard include/*.hrl); @touch $@
+src/%.xrl:  $(wildcard include/*.hrl); @touch $@
+src/%.yrl:  $(wildcard include/*.hrl); @touch $@
+src/%.S:    $(wildcard include/*.hrl); @touch $@
+src/%.core: $(wildcard include/*.hrl); @touch $@
+#.PRECIOUS: src/%.app.src
+
 ebin/%.app: src/%.app.src               | ebin/
 	@erl -noshell -eval '{ok,_} = file:consult("$<").' -s init stop
 	cp $< $@
