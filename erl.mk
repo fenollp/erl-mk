@@ -102,8 +102,17 @@ logs/:
 
 escript: | all
 	$(eval $@_APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src)))
-	# See rebar_escripter.erl:47-…
-	
+	@erl -noshell \
+	     -eval 'escript:create("$@_APP", [ {shebang, "#!/usr/bin/env escript\n"}' \
+	                                    ', {comment, "%% -*- erlang coding: utf8 -*-\n"}' \
+	                                    ', {emu_args, "%%! -pa $@_APP/$@_APP/ebin\n"}' \
+	                                    ', {archive, [{case F of "ebin/"++E -> E;' \
+	                                                           ' "deps/"++D -> D end' \
+	                                                 ', element(2,file:read_file(F))}' \
+	                                                '|| F <- filelib:wildcard("ebin/*")' \
+	                                                    ' ++ filelib:wildcard("deps/*/ebin/*")]' \
+	                                              ', []}]).' \
+	     -s init stop
 
 ### DOCS -- Compiles the app's documentation into doc/
 
