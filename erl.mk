@@ -102,10 +102,13 @@ logs/:
 
 escript: | all
 	$(eval $@_APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src)))
-	@erl -noshell \
-	     -eval 'escript:create("$@_APP", [ {shebang, "#!/usr/bin/env escript\n"}' \
-	                                    ', {comment, "%% -*- erlang coding: utf8 -*-\n"}' \
-	                                    ', {emu_args, "%%! -pa $@_APP/$@_APP/ebin\n"}' \
+	erl -noshell \
+	     -eval 'escript:create("$($@_APP)", [ {shebang,default}, {comment,""}, {emu_args,""}, {archive, [{case F of "ebin/"++E -> E; "deps/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("deps/*/ebin/*")], []}]).' \
+	     -eval '{ok, Mode8} = file:read_file_info("$($@_APP)"), ok = file:change_mode("$($@_APP)", element(8,Mode8) bor 8#00100).' \
+	     -s init stop
+#	@erl -noshell \
+	     -eval 'escript:create("$@_APP", [ {shebang, default}' \
+	                                    ', {emu_args, "-pa $@_APP/$@_APP/ebin\n"}' \
 	                                    ', {archive, [{case F of "ebin/"++E -> E;' \
 	                                                           ' "deps/"++D -> D end' \
 	                                                 ', element(2,file:read_file(F))}' \
