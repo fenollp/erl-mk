@@ -103,6 +103,7 @@ logs/:
 escript: | all
 	$(eval $@_APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src)))
 	@erl -noshell \
+	     -eval 'io:format("Compiling escript \"./$($@_APP)\".\n").' \
 	     -eval 'escript:create("$($@_APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $($@_APP)"}, {archive, [{case F of "ebin/"++E -> E; "deps/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("deps/*/ebin/*")], []}]).' \
 	     -eval '{ok, Mode8} = file:read_file_info("$($@_APP)"), ok = file:change_mode("$($@_APP)", element(8,Mode8) bor 8#00100).' \
 	     -s init stop
