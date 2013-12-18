@@ -64,6 +64,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make eunit.Mod`  | Compile & EUnit-test code in `test/Mod_tests.erl`           |
 | `make ct`         | Compile & EUnit-test files in `test/*_SUITE.erl`            |
 | `make ct.Mod`     | Compile & CommonTest-test code in `test/Mod_SUITE.erl`      |
+| `make escript`    | Generate a stand-alone `escript` executable                 |
 | `make docs`       | Generate the app's documentation into `doc/`                |
 | `make clean-docs` | Remove `doc/{edoc-info,*.{css,html,png}}`                   |
 | `make clean`      | Remove `ebin/`                                              |
