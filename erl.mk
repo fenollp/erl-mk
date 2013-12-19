@@ -1,6 +1,8 @@
 all: deps app
 .PHONY: all
 
+APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
+
 ### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
 
 deps : $(patsubst %,deps/%/,$(DEPS))    | deps-dir
@@ -101,21 +103,19 @@ logs/:
 ### ESCRIPT -- Create a stand-alone EScript executable.
 
 escript: | all
-	$(eval $@_APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src)))
 	@erl -noshell \
-	     -eval 'io:format("Compiling escript \"./$($@_APP)\".\n").' \
-	     -eval 'escript:create("$($@_APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $($@_APP)"}, {archive, [{case F of "ebin/"++E -> E; "deps/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("deps/*/ebin/*")], []}]).' \
-	     -eval '{ok, Mode8} = file:read_file_info("$($@_APP)"), ok = file:change_mode("$($@_APP)", element(8,Mode8) bor 8#00100).' \
+	     -eval 'io:format("Compiling escript \"./$(APP)\".\n").' \
+	     -eval 'escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $(APP)"}, {archive, [{case F of "ebin/"++E -> E; "deps/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("deps/*/ebin/*")], []}]).' \
+	     -eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
 	     -s init stop
 
 ### DOCS -- Compiles the app's documentation into doc/
 
 docs: $(foreach ext,app.src erl xrl yrl S core, $(wildcard src/*.$(ext))) \
                                                 $(wildcard doc/overview.edoc)
-	$(eval $@_APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src)))
 	@erl -noshell \
-	     -eval 'io:format("Compiling documentation for $($@_APP).\n").' \
-	     -eval 'edoc:application($($@_APP), ".", [$(EDOC_OPTS)]).' \
+	     -eval 'io:format("Compiling documentation for $(APP).\n").' \
+	     -eval 'edoc:application($(APP), ".", [$(EDOC_OPTS)]).' \
 	     -s init stop
 .PHONY: docs
 
