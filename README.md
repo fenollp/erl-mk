@@ -76,7 +76,6 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 * Support the generic arch (eg. apps/, …)
 * Proper compilation of `ct` target's files (ie `-no_auto_compile` issue)
 * Do | Document the ≠ ENV variables available.
-* Watch HRLs like in https://github.com/extend/erlang.mk/pull/27
 
 ## ¬TODO
 * `relx`|`rebar` download tool | wrapper

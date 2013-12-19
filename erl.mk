@@ -28,28 +28,28 @@ app: $(patsubst src/%.app.src,    ebin/%.app,  $(wildcard src/*.app.src)) \
      $(patsubst templates/%.dtl,  ebin/%_dtl.beam,$(wildcard templates/*.dtl))
 .PHONY: app
 
-ebin/%.app: src/%.app.src               | ebin/
+ebin/%.app: src/%.app.src                       | ebin/
 	@erl -noshell -eval '{ok,_} = file:consult("$<").' -s init stop
 	cp $< $@
 
-ebin/%.beam: src/%.erl                  | ebin/
+ebin/%.beam: src/%.erl $(wildcard include/*)    | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 
-ebin/%.beam: src/%.xrl                  | ebin/
+ebin/%.beam: src/%.xrl $(wildcard include/*)    | ebin/
 	erlc -o ebin/ $<
 	erlc -o ebin/ ebin/$*.erl
 
-ebin/%.beam: src/%.yrl                  | ebin/
+ebin/%.beam: src/%.yrl $(wildcard include/*)    | ebin/
 	erlc -o ebin/ $<
 	erlc -o ebin/ ebin/$*.erl
 
-ebin/%.beam: src/%.S                    | ebin/
+ebin/%.beam: src/%.S $(wildcard include/*)      | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -Iinclude/ -Ideps/ $<
 
-ebin/%.beam: src/%.core                 | ebin/
+ebin/%.beam: src/%.core $(wildcard include/*)   | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -Ideps/ $<
 
-ebin/%_dtl.beam: templates/%.dtl        | ebin/
+ebin/%_dtl.beam: templates/%.dtl                | ebin/
 	$(if $(shell [[ ! -d deps/erlydtl ]] && echo y), \
 	    $(error Error compiling $<: deps/erlydtl/ not found))
 	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
