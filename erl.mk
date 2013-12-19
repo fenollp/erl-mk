@@ -24,7 +24,7 @@ deps/%/:
 
 ### APP -- Compiles src/ into ebin/
 
-app: $(patsubst src/%.app.src,    ebin/%.app,  $(wildcard src/*.app.src)) \
+app: ebin/$(APP).app \
      $(foreach ext, erl xrl yrl S core, \
          $(patsubst src/%.$(ext), ebin/%.beam, $(wildcard src/*.$(ext)))) \
      $(patsubst templates/%.dtl,  ebin/%_dtl.beam,$(wildcard templates/*.dtl))
