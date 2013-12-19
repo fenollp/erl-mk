@@ -31,7 +31,9 @@ app: ebin/$(APP).app \
 .PHONY: app
 
 ebin/%.app: src/%.app.src                       | ebin/
-	@erl -noshell -eval '{ok,_} = file:consult("$<").' -s init stop
+	@erl -noshell \
+	     -eval 'case file:consult("$<") of {ok,_}->ok; {error,{_,_,M}}->io:format("$<: ~s~s\n",M),halt(1) end.' \
+	     -s init stop
 	cp $< $@
 
 ebin/%.beam: src/%.erl $(wildcard include/*)    | ebin/
