@@ -40,11 +40,11 @@ ebin/%.beam: src/%.erl $(wildcard include/*)    | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
 
 ebin/%.beam: src/%.xrl $(wildcard include/*)    | ebin/
-	erlc -o ebin/ $<
+	erlc -o ebin/ $(ERLCFLAGS) $<
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.yrl $(wildcard include/*)    | ebin/
-	erlc -o ebin/ $<
+	erlc -o ebin/ $(ERLCFLAGS) $<
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S $(wildcard include/*)      | ebin/
