@@ -36,7 +36,7 @@ define build_dependencies
    @# to handle make\'s escaping rules
    $(verbose) erlc -o ebin/ -M $(ERLCFLAGS) -v -Iinclude/ -Ideps/ `cat $(ERLS_TO_BUILD)` | \
       awk '/\\$$/ {printf("%s ", substr($$0, 1, length($$0) - 1)); next} // { print }' > $(CHANGED_DEPENDENCIES)
-   $(verbose) grep -v -f $(BEAMS_BUILT) $(DEPENDENCIES) > $(STRIPPED_DEPENDENCIES)
+   $(verbose) (grep -v -f $(BEAMS_BUILT) $(DEPENDENCIES) > $(STRIPPED_DEPENDENCIES); echo -n)
    $(verbose) cat $(STRIPPED_DEPENDENCIES) $(CHANGED_DEPENDENCIES) | sed '/^$$/d' > $(DEPENDENCIES)
    $(verbose) rm $(STRIPPED_DEPENDENCIES) $(CHANGED_DEPENDENCIES) $(ERLS_TO_BUILD) $(BEAMS_BUILT)
 endef
@@ -53,6 +53,7 @@ app: get-deps start-build ebin/$(APP).app \
 	$(if $(wildcard $(ERLS_TO_BUILD)), \
 		$(call build) \
 	)
+	@echo Done
 
 ebin/%.app: src/%.app.src                       | ebin/
 	@erl -noshell \
