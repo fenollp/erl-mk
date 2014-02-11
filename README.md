@@ -5,7 +5,7 @@ Include this in your Makefile:
 all: erl.mk
 
 erl.mk:
-	wget -nv -O erl.mk 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm erl.mk
+	wget -nv -O erl.mk 'https://raw.github.com/id3as/erl-mk/master/erl.mk' || rm erl.mk
 
 DEPS =
 
