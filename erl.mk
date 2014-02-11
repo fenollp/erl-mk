@@ -53,7 +53,6 @@ app: get-deps start-build ebin/$(APP).app \
 	$(if $(wildcard $(ERLS_TO_BUILD)), \
 		$(call build) \
 	)
-	@echo Done
 
 ebin/%.app: src/%.app.src                       | ebin/
 	@erl -noshell \
