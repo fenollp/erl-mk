@@ -27,7 +27,7 @@ STRIPPED_DEPENDENCIES:=$(shell mktemp -u /tmp/$(APP).stripped_deps.XXXX)
 define compile_erl
    $(verbose) echo Compiling...
    $(verbose) sed 's/^/  /' $(ERLS_TO_BUILD)
-   $(verbose) erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ `cat $(ERLS_TO_BUILD)`
+   $(verbose) erlc -pa ebin/ -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ `cat $(ERLS_TO_BUILD)`
 endef
 
 define build_dependencies
