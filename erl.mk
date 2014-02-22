@@ -177,7 +177,6 @@ define get_dep
 		cd $(DEPS_DIR)/$(1); git checkout -q $(3) ; \
 	else \
 		echo Already cloned $(1) / $(3) from $(2) ; \
-		cd $(DEPS_DIR)/$(1); git checkout -q $(3) ; \
 	fi
 endef
 
