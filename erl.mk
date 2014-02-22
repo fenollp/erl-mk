@@ -171,9 +171,14 @@ REBAR_DEPS_DIR = $(DEPS_DIR)
 export REBAR_DEPS_DIR
 
 define get_dep
-	@echo Cloning $(1) / $(3) from $(2)
-	git clone -n -- $(2) $(DEPS_DIR)/$(1)
-	cd $(DEPS_DIR)/$(1); git checkout -q $(3)
+	@if [[ ! -d "$(DEPS_DIR)/$(1)" ]] ; then \
+		echo Cloning $(1) / $(3) from $(2) ; \
+		git clone -n -- $(2) $(DEPS_DIR)/$(1) ; \
+		cd $(DEPS_DIR)/$(1); git checkout -q $(3) ; \
+	else \
+		echo Already cloned $(1) / $(3) from $(2) ; \
+		cd $(DEPS_DIR)/$(1); git checkout -q $(3) ; \
+	fi
 endef
 
 define build_dep
