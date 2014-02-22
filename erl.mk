@@ -216,7 +216,7 @@ update-deps: get-deps $(patsubst %,update-deps/%/,$(DEPS))
 clean-deps: get-deps $(patsubst %,clean-deps/%/,$(DEPS))
 
 deps-dir:
-	$(if $(wildcard deps/),,mkdir deps/)
+	$(if $(wildcard $(DEPS_DIR)),,mkdir $(DEPS_DIR))
 
 deps/%/:
 	$(call get_dep,$*,$(word 1,$(dep_$*)),$(word 2,$(dep_$*)))
