@@ -168,6 +168,8 @@ docs: $(foreach ext,app.src erl xrl yrl S core, $(wildcard src/*.$(ext))) \
 DEPS_DIR ?= $(CURDIR)/deps
 export DEPS_DIR
 
+FULL_DEPS = $(addsuffix /, $(addprefix $(DEPS_DIR)/, $(DEPS)))
+
 REBAR_DEPS_DIR = $(DEPS_DIR)
 export REBAR_DEPS_DIR
 
@@ -219,9 +221,12 @@ clean-deps: get-deps $(patsubst %,clean-deps/%/,$(DEPS))
 deps-dir:
 	$(if $(wildcard $(DEPS_DIR)),,mkdir $(DEPS_DIR))
 
-deps/%/:
-	$(call get_dep,$*,$(word 1,$(dep_$*)),$(word 2,$(dep_$*)))
-	$(call build_dep,$*)
+$(FULL_DEPS):
+	$(call get_dep,$(@F),$(word 1,$(dep_$(@F))),$(word 2,$(dep_$(@F))))
+	$(call build_dep,$(@F))
+
+deps/%/ : | $(DEPS_DIR)/%/
+	@#
 
 build-deps/%/:
 	$(call build_dep,$*)
@@ -232,7 +237,7 @@ update-deps/%/:
 clean-deps/%/:
 	$(call clean_dep,$*)
 
-.PHONY: get-deps deps-dir build-deps update-deps clean-deps deps/%/ build-deps/%/ update-deps/%/ clean-deps/%/
+.PHONY: get-deps deps-dir build-deps update-deps clean-deps build-deps/%/ update-deps/%/ clean-deps/%/
 
 ##------------------------------------------------------------------------------
 ## RELEASE
