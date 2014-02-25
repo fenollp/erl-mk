@@ -184,8 +184,8 @@ endef
 
 define build_dep
 	@if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
-		echo 'make -C $(DEPS_DIR)/$(1) all' ; \
-	       	make -C $(DEPS_DIR)/$(1) all  ; \
+		echo 'make -C $(DEPS_DIR)/$(1)' ; \
+	       	make -C $(DEPS_DIR)/$(1)  ; \
 	else \
 		echo 'cd $(DEPS_DIR)/$(1) && rebar get-deps compile && cd ../..' ; \
 	        cd $(DEPS_DIR)/$(1) && rebar get-deps compile && cd ../..  ; \
