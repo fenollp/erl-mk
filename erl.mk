@@ -200,12 +200,12 @@ define update_dep
 endef
 
 define clean_dep
-	@if [[ -f deps/$(1)/makefile ]] || [[ -f deps/$(1)/Makefile ]] ; then \
-		echo 'make -C deps/$(1) clean' ; \
-	       	make -C deps/$(1) clean  ; \
+	@if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
+		echo 'make -C $(DEPS_DIR)/$(1) clean' ; \
+	       	make -C $(DEPS_DIR)/$(1) clean  ; \
 	else \
-		echo 'cd deps/$(1) && rebar clean && cd ../..' ; \
-	        cd deps/$(1) && rebar clean && cd ../..  ; \
+		echo 'cd $(DEPS_DIR)/$(1) && rebar clean && cd ../..' ; \
+	        cd $(DEPS_DIR)/$(1) && rebar clean && cd ../..  ; \
 	fi
 endef
 
