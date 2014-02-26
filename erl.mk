@@ -34,7 +34,7 @@ define build_dependencies
    @# The makefile created by the -M flag uses line continuations for long lists of pre-requisites.
    @# The awk command simply collapse each rule down to a single line.  Note the double '$' - this is
    @# to handle make\'s escaping rules
-   $(verbose) erlc -o ebin/ -M $(ERLCFLAGS) -v -Iinclude/ -Ideps/ `cat $(ERLS_TO_BUILD)` | \
+   $(verbose) erlc -o ebin/ -M $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ `cat $(ERLS_TO_BUILD)` | \
       awk '/\\$$/ {printf("%s ", substr($$0, 1, length($$0) - 1)); next} // { print }' > $(CHANGED_DEPENDENCIES)
    $(verbose) (grep -v -f $(BEAMS_BUILT) $(DEPENDENCIES) > $(STRIPPED_DEPENDENCIES); echo -n)
    $(verbose) cat $(STRIPPED_DEPENDENCIES) $(CHANGED_DEPENDENCIES) | sed '/^$$/d' > $(DEPENDENCIES)
@@ -78,15 +78,15 @@ ebin/%.beam: src/%.yrl $(wildcard include/*)    | ebin/
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S $(wildcard include/*)      | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -Iinclude/ -Ideps/ $<
+	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -Iinclude/ -I$(DEPS_DIR)/ $<
 
 ebin/%.beam: src/%.core $(wildcard include/*)   | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -Ideps/ $<
+	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -I$(DEPS_DIR)/ $<
 
 ebin/%_dtl.beam: templates/%.dtl                | ebin/
-	$(if $(shell [[ ! -d deps/erlydtl ]] && echo y), \
-	    $(error Error compiling $<: deps/erlydtl/ not found))
-	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
+	$(if $(shell [[ ! -d $(DEPS_DIR)/erlydtl ]] && echo y), \
+	    $(error Error compiling $<: $(DEPS_DIR)/erlydtl/ not found))
+	@erl -noshell -pa ebin/ -pa $(DEPS_DIR)/*/ebin/ \
 	     -eval 'io:format("Compiling ErlyDTL template $<\n").' \
 	     -eval 'erlydtl:compile("$<", $*_dtl, [{out_dir,"ebin/"}]).' \
 	     -s init stop
@@ -105,12 +105,12 @@ ebin/:
 eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
 
 eunit.%: app test/%_tests.beam
-	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
+	@erl -noshell -pa ebin/ -pa $(DEPS_DIR)/*/ebin/ \
 	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
 	     -s init stop
 
 test/%_tests.beam: test/%_tests.erl
-	@erlc -o test/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+	@erlc -o test/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
 
 .PRECIOUS: test/%.beam
 
@@ -129,7 +129,7 @@ ct.%: app test/%_SUITE.beam                 | logs/
 	        -suite $*_SUITE || true
 
 test/%_SUITE.beam: test/%_SUITE.erl
-	@erlc -o test/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+	@erlc -o test/ $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
 
 .PRECIOUS: test/%_SUITE.beam
 
@@ -145,7 +145,7 @@ logs/:
 escript: | all
 	@erl -noshell \
 	     -eval 'io:format("Compiling escript \"./$(APP)\".\n").' \
-	     -eval 'escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $(APP)"}, {archive, [{case F of "ebin/"++E -> E; "deps/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("deps/*/ebin/*")], []}]).' \
+	     -eval 'escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $(APP)"}, {archive, [{case F of "ebin/"++E -> E; "$(DEPS_DIR)/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("$(DEPS_DIR)/*/ebin/*")], []}]).' \
 	     -eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
 	     -s init stop
 
