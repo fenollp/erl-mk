@@ -12,6 +12,8 @@ DEPS =
 include erl.mk
 
 # Your targets after this line.
+
+## Redefine an erl.mk target here to implement special behavior!
 ```
 
 Now, `make -j`. This is the parallel exquivalent of `rebar -j get-deps compile`.
