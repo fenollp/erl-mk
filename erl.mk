@@ -57,7 +57,7 @@ ebin/%_dtl.beam: templates/%.dtl                | ebin/
 	$(if $(shell [[ ! -d deps/erlydtl ]] && echo y), \
 	    $(error Error compiling $<: deps/erlydtl/ not found))
 	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
-	     -eval 'io:format("Compiling ErlyDTL template $<\n").' \
+	     -eval 'io:format("Compiling ErlyDTL template: $< -> $@\n").' \
 	     -eval 'erlydtl:compile("$<", $*_dtl, [{out_dir,"ebin/"}]).' \
 	     -s init stop
 
