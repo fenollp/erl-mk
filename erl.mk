@@ -3,16 +3,32 @@
 ##------------------------------------------------------------------------------
 ## GENERAL
 ##------------------------------------------------------------------------------
-.DEFAULT_GOAL := app
 
 SHELL = /bin/bash
+
 APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
+APPS += $(notdir $(wildcard apps/*))
+
+ifeq ($(APP), )
+.DEFAULT_GOAL := apps
+else
+.DEFAULT_GOAL := app
+endif
 
 V ?= 0
 verbose_0 = @echo -n;
 verbose = $(verbose_$(V))
 
 all: get-deps app
+
+apps : $(APPS)
+
+$(APPS): erl.mk
+	@if [ -f apps/$@/Makefile ] || [ -f apps/$@/makefile ] ; then \
+		$(MAKE) -C apps/$@; \
+	else \
+		$(MAKE) -C apps/$@ -f ../../erl.mk; \
+	fi
 
 ##------------------------------------------------------------------------------
 ## COMPILE
@@ -24,6 +40,25 @@ BEAMS_BUILT:=$(shell mktemp -u /tmp/$(APP).built.XXXX)
 CHANGED_DEPENDENCIES:=$(shell mktemp -u /tmp/$(APP).changed_deps.XXXX)
 STRIPPED_DEPENDENCIES:=$(shell mktemp -u /tmp/$(APP).stripped_deps.XXXX)
 
+C_HEADERS = $(wildcard c_src/*.h)
+C_OBJECTS = $(patsubst %.c, %.o, $(wildcard c_src/*.c))
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Darwin)
+	ERL_DIR = $(shell erl -noshell -eval 'io:format("~s~n", [code:lib_dir(erl_interface)])' -eval 'init:stop()')
+	CFLAGS += -I $(ERL_DIR)/include
+	LDFLAGS += -L /usr/local/lib -L $(ERL_DIR)/lib -lei
+	TARGET = priv/video_capture
+	MAKE_TARGET = ar rcs $(TARGET) $(OBJECTS)
+endif
+ifeq ($(UNAME), Linux)
+	ERL_DIR = $(shell erl -noshell -eval 'io:format("~s~n", [code:lib_dir(erl_interface)])' -eval 'init:stop()')
+	CFLAGS += -I $(ERL_DIR)/include
+	LDFLAGS += -L /usr/local/lib -L $(ERL_DIR)/lib -lei
+	TARGET = priv/video_capture
+	MAKE_TARGET = ar rcs $(TARGET) $(OBJECTS)
+endif
+
 define compile_erl
    $(verbose) echo Compiling...
    $(verbose) sed 's/^/  /' $(ERLS_TO_BUILD)
@@ -34,7 +69,7 @@ define build_dependencies
    @# The makefile created by the -M flag uses line continuations for long lists of pre-requisites.
    @# The awk command simply collapse each rule down to a single line.  Note the double '$' - this is
    @# to handle make\'s escaping rules
-   $(verbose) erlc -o ebin/ -M $(ERLCFLAGS) -v -Iinclude/ -Ideps/ `cat $(ERLS_TO_BUILD)` | \
+   $(verbose) erlc -o ebin/ -M $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ `cat $(ERLS_TO_BUILD)` | \
       awk '/\\$$/ {printf("%s ", substr($$0, 1, length($$0) - 1)); next} // { print }' > $(CHANGED_DEPENDENCIES)
    $(verbose) (grep -v -f $(BEAMS_BUILT) $(DEPENDENCIES) > $(STRIPPED_DEPENDENCIES); echo -n)
    $(verbose) cat $(STRIPPED_DEPENDENCIES) $(CHANGED_DEPENDENCIES) | sed '/^$$/d' > $(DEPENDENCIES)
@@ -49,10 +84,25 @@ endef
 app: get-deps start-build ebin/$(APP).app \
      $(foreach ext, erl xrl yrl S core, \
 	$(addprefix ebin/, $(notdir $(patsubst src/%.$(ext), %.beam, $(wildcard src/*.$(ext)) $(wildcard src/*/*.$(ext)))))) \
+     $(C_TARGET_NAME) \
      $(patsubst templates/%.dtl, ebin/%_dtl.beam, $(wildcard templates/*.dtl)) | ebin/
 	$(if $(wildcard $(ERLS_TO_BUILD)), \
 		$(call build) \
 	)
+
+$(C_TARGET_NAME) : $(C_OBJECTS)
+	@if [ $(C_TARGET) == "static_library" ] ; then \
+		echo Creating archive $(C_TARGET_NAME) ; \
+		ar rcs $(C_TARGET_NAME) $(C_OBJECTS) ; \
+	else \
+		if [ $(C_TARGET) == "executable" ]; then \
+			echo Creating executable $(C_TARGET_NAME) ; \
+			$(CC) $(C_OBJECTS) $(LDFLAGS) -o $(C_TARGET_NAME) ; \
+		fi \
+	fi
+
+c_src/%.o: c_src/%.c $(C_HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 ebin/%.app: src/%.app.src                       | ebin/
 	@erl -noshell \
@@ -78,15 +128,15 @@ ebin/%.beam: src/%.yrl $(wildcard include/*)    | ebin/
 	erlc -o ebin/ ebin/$*.erl
 
 ebin/%.beam: src/%.S $(wildcard include/*)      | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -Iinclude/ -Ideps/ $<
+	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -Iinclude/ -I$(DEPS_DIR)/ $<
 
 ebin/%.beam: src/%.core $(wildcard include/*)   | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -Ideps/ $<
+	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -I$(DEPS_DIR)/ $<
 
 ebin/%_dtl.beam: templates/%.dtl                | ebin/
-	$(if $(shell [[ ! -d deps/erlydtl ]] && echo y), \
-	    $(error Error compiling $<: deps/erlydtl/ not found))
-	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
+	$(if $(shell [[ ! -d $(DEPS_DIR)/erlydtl ]] && echo y), \
+	    $(error Error compiling $<: $(DEPS_DIR)/erlydtl/ not found))
+	@erl -noshell -pa ebin/ -pa $(DEPS_DIR)/*/ebin/ \
 	     -eval 'io:format("Compiling ErlyDTL template $<\n").' \
 	     -eval 'erlydtl:compile("$<", $*_dtl, [{out_dir,"ebin/"}]).' \
 	     -s init stop
@@ -105,12 +155,12 @@ ebin/:
 eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
 
 eunit.%: app test/%_tests.beam
-	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
+	@erl -noshell -pa ebin/ -pa $(DEPS_DIR)/*/ebin/ \
 	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
 	     -s init stop
 
 test/%_tests.beam: test/%_tests.erl
-	@erlc -o test/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+	@erlc -o test/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
 
 .PRECIOUS: test/%.beam
 
@@ -129,7 +179,7 @@ ct.%: app test/%_SUITE.beam                 | logs/
 	        -suite $*_SUITE || true
 
 test/%_SUITE.beam: test/%_SUITE.erl
-	@erlc -o test/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+	@erlc -o test/ $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
 
 .PRECIOUS: test/%_SUITE.beam
 
@@ -145,7 +195,7 @@ logs/:
 escript: | all
 	@erl -noshell \
 	     -eval 'io:format("Compiling escript \"./$(APP)\".\n").' \
-	     -eval 'escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $(APP)"}, {archive, [{case F of "ebin/"++E -> E; "deps/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("deps/*/ebin/*")], []}]).' \
+	     -eval 'escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $(APP)"}, {archive, [{case F of "ebin/"++E -> E; "$(DEPS_DIR)/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("$(DEPS_DIR)/*/ebin/*")], []}]).' \
 	     -eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
 	     -s init stop
 
@@ -184,11 +234,11 @@ endef
 
 define build_dep
 	@if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
-		echo 'make -C $(DEPS_DIR)/$(1) all' ; \
-	       	make -C $(DEPS_DIR)/$(1) all  ; \
+		echo 'make -C $(DEPS_DIR)/$(1)' ; \
+	       	make -C $(DEPS_DIR)/$(1)  ; \
 	else \
-		echo 'cd $(DEPS_DIR)/$(1) && rebar get-deps compile && cd ../..' ; \
-	        cd $(DEPS_DIR)/$(1) && rebar get-deps compile && cd ../..  ; \
+		echo 'cd $(DEPS_DIR)/$(1) && ./rebar get-deps compile && cd ../..' ; \
+	        cd $(DEPS_DIR)/$(1) && ./rebar get-deps compile && cd ../..  ; \
 	fi
 endef
 
@@ -200,12 +250,12 @@ define update_dep
 endef
 
 define clean_dep
-	@if [[ -f deps/$(1)/makefile ]] || [[ -f deps/$(1)/Makefile ]] ; then \
-		echo 'make -C deps/$(1) clean' ; \
-	       	make -C deps/$(1) clean  ; \
+	@if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
+		echo 'make -C $(DEPS_DIR)/$(1) clean' ; \
+	       	make -C $(DEPS_DIR)/$(1) clean  ; \
 	else \
-		echo 'cd deps/$(1) && rebar clean && cd ../..' ; \
-	        cd deps/$(1) && rebar clean && cd ../..  ; \
+		echo 'cd $(DEPS_DIR)/$(1) && rebar clean && cd ../..' ; \
+	        cd $(DEPS_DIR)/$(1) && rebar clean && cd ../..  ; \
 	fi
 endef
 
