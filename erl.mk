@@ -221,6 +221,7 @@ FULL_DEPS = $(addsuffix /, $(addprefix $(DEPS_DIR)/, $(DEPS)))
 
 REBAR_DEPS_DIR = $(DEPS_DIR)
 export REBAR_DEPS_DIR
+GLOBAL_REBAR = $(shell which rebar || echo "./rebar")
 
 define get_dep
 	@if [[ ! -d "$(DEPS_DIR)/$(1)" ]] ; then \
@@ -233,12 +234,32 @@ define get_dep
 endef
 
 define build_dep
-	@if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
+	@if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]] ; then \
+		if [[ -f $(DEPS_DIR)/$(1)/rebar ]]; then \
+			export THIS_REBAR="./rebar"; \
+		else \
+			if [[ -f $(GLOBAL_REBAR) ]]; then \
+				export THIS_REBAR=$(GLOBAL_REBAR) ; \
+			else \
+				echo $(1) has rebar.config but no rebar - pulling form github...; \
+				wget -nv -O $(DEPS_DIR)/$(1)/rebar 'https://raw.github.com/id3as/erl-mk/master/rebar'; \
+				chmod 744 $(DEPS_DIR)/$(1)/rebar ; \
+				export THIS_REBAR="./rebar" ; \
+			fi \
+		fi \
+	fi ; \
+	echo BUILD $(1) - $(ERL_LIBS), $(DEPS_DIR) ; \
+	if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
 		echo 'make -C $(DEPS_DIR)/$(1)' ; \
 	       	make -C $(DEPS_DIR)/$(1)  ; \
 	else \
-		echo 'cd $(DEPS_DIR)/$(1) && ./rebar get-deps compile && cd ../..' ; \
-	        cd $(DEPS_DIR)/$(1) && ./rebar get-deps compile && cd ../..  ; \
+		if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]]; then \
+			echo 'cd $(DEPS_DIR)/$(1) && $THIS_REBAR get-deps compile && cd ../..' ; \
+			cd $(DEPS_DIR)/$(1) && $$THIS_REBAR get-deps compile && cd ../.. ; \
+		else \
+			echo "Don't know how to build $(1) - no makefile or rebar.config" ; \
+			exit 1 ; \
+		fi \
 	fi
 endef
 
