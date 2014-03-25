@@ -22,6 +22,7 @@ verbose = $(verbose_$(V))
 all: get-deps app
 
 apps : $(APPS)
+	@echo > /dev/null
 
 $(APPS): erl.mk
 	@if [ -f apps/$@/Makefile ] || [ -f apps/$@/makefile ] ; then \
