@@ -10,10 +10,17 @@ APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 APPS += $(notdir $(wildcard apps/*))
 
 ifeq ($(APP), )
+
 .DEFAULT_GOAL := apps
+
 else
+
 .DEFAULT_GOAL := app
+
 endif
+
+space :=
+space +=
 
 V ?= 0
 verbose_0 = @echo -n;
@@ -30,6 +37,9 @@ $(APPS): erl.mk
 	else \
 		$(MAKE) -C apps/$@ -f ../../erl.mk; \
 	fi
+
+$(addsuffix .%, $(APPS)) : 
+	$(MAKE) -C apps/$(word 1, $(subst ., , $@)) $*
 
 ##------------------------------------------------------------------------------
 ## COMPILE
@@ -153,11 +163,13 @@ ebin/:
 ## EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files).
 ##------------------------------------------------------------------------------
 
-eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
+eunit: $(foreach ext, erl, \
+	$(addprefix eunit., $(notdir $(patsubst src/%.$(ext), %, $(wildcard src/*.$(ext)) $(wildcard src/*/*.$(ext))))))
+	@echo All tests done
 
-eunit.%: app test/%_tests.beam
-	@erl -noshell -pa ebin/ -pa $(DEPS_DIR)/*/ebin/ \
-	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
+eunit.%: app ebin/%.beam
+	@erl -noshell \
+	     -eval 'eunit:test($*, [verbose]).' \
 	     -s init stop
 
 test/%_tests.beam: test/%_tests.erl
@@ -170,7 +182,6 @@ test/%_tests.beam: test/%_tests.erl
 ##------------------------------------------------------------------------------
 ## CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl).
 ##------------------------------------------------------------------------------
-
 ct: $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.erl))
 
 ct.%: app test/%_SUITE.beam                 | logs/
