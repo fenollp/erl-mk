@@ -335,6 +335,27 @@ clean-deps/%/:
 .PHONY: get-deps deps-dir build-deps update-deps clean-deps build-deps/%/ update-deps/%/ clean-deps/%/
 
 ##------------------------------------------------------------------------------
+## DIALYZER
+##------------------------------------------------------------------------------
+PLT_APPS ?=
+DIALYZER_OPTS ?= -Werror_handling -Wrace_conditions -Wunmatched_returns # -Wunderspecs
+APP_DIRS = $(wildcard ebin) $(wildcards apps/*/ebin)
+
+build-base-plt: | ~/plts
+	dialyzer --build_plt --apps erts kernel stdlib mnesia compiler crypto hipe edoc gs syntax_tools inets xmerl ssl runtime_tools public_key asn1 os_mon sasl eunit --output_plt ~/plts/base.plt
+
+~/plts:
+	mkdir ~/plts
+
+build-plt: app
+	@dialyzer -r $(DEPS_DIR) --add_to_plt --plt ~/plts/base.plt --output_plt dialyzer.plt
+
+dialyzer: all
+	dialyzer -r $(APP_DIRS) --plt dialyzer.plt -Wunmatched_returns -Werror_handling -Wrace_conditions --verbose
+
+.PHONY: build-base-plt build-plt dialyzer
+
+##------------------------------------------------------------------------------
 ## RELEASE
 ##------------------------------------------------------------------------------
 
