@@ -160,12 +160,27 @@ ebin/:
 .PHONY: app start-build
 
 ##------------------------------------------------------------------------------
-## EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files).
+## EUNIT 
 ##------------------------------------------------------------------------------
+ifeq ($(APP), )
 
-eunit: $(foreach ext, erl, \
-	$(addprefix eunit., $(notdir $(patsubst src/%.$(ext), %, $(wildcard src/*.$(ext)) $(wildcard src/*/*.$(ext))))))
-	@echo All tests done
+eunit: $(addsuffix .eunit, $(APPS))
+	@echo > /dev/null
+else
+
+TESTS = $(foreach ext, erl, $(addprefix eunit., $(notdir $(patsubst src/%.$(ext), %, $(wildcard src/*.$(ext)) $(wildcard src/*/*.$(ext))))))
+
+eunit_start_message:
+	@echo ------------------------------------------------------------
+	@echo eunit tests starting for $(APP)
+	@echo ------------------------------------------------------------
+	@echo
+
+eunit: eunit_start_message $(TESTS)
+	@echo ------------------------------------------------------------
+	@echo eunit tests completed for $(APP)
+	@echo ------------------------------------------------------------
+endif
 
 eunit.%: app ebin/%.beam
 	@erl -noshell \
@@ -177,12 +192,29 @@ test/%_tests.beam: test/%_tests.erl
 
 .PRECIOUS: test/%.beam
 
-.PHONY: eunit eunit.%
+.PHONY: eunit eunit.% eunit_start_message
 
 ##------------------------------------------------------------------------------
 ## CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl).
 ##------------------------------------------------------------------------------
-ct: $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.erl))
+ifeq ($(APP), )
+
+ct: $(addsuffix .ct, $(APPS))
+	@echo > /dev/null
+
+else
+
+ct_start_message:
+	@echo ------------------------------------------------------------
+	@echo ct tests starting for $(APP)
+	@echo ------------------------------------------------------------
+	@echo
+
+ct: ct_start_message $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.erl))
+	@echo ------------------------------------------------------------
+	@echo ct tests completed for $(APP)
+	@echo ------------------------------------------------------------
+endif 
 
 ct.%: app test/%_SUITE.beam                 | logs/
 	@ct_run -noshell -dir test/ -logdir logs/ \
