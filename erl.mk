@@ -8,6 +8,11 @@ SHELL = /bin/bash
 
 APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 APPS += $(notdir $(wildcard apps/*))
+DEPS_DIR ?= $(addsuffix /deps, $(realpath .))
+ERL_LIBS := $(DEPS_DIR):$(realpath apps):$(ERL_LIBS)
+
+export DEPS_DIR
+export ERL_LIBS
 
 ifeq ($(APP), )
 
@@ -21,6 +26,7 @@ endif
 
 space :=
 space +=
+comma := ,
 
 V ?= 0
 verbose_0 = @echo -n;
@@ -44,13 +50,6 @@ $(addsuffix .%, $(APPS)) :
 ##------------------------------------------------------------------------------
 ## COMPILE
 ##------------------------------------------------------------------------------
-DEPENDENCIES=./.erl.mk.deps
-
-ERLS_TO_BUILD:=$(shell mktemp -u /tmp/$(APP).to_build.XXXX)
-BEAMS_BUILT:=$(shell mktemp -u /tmp/$(APP).built.XXXX)
-CHANGED_DEPENDENCIES:=$(shell mktemp -u /tmp/$(APP).changed_deps.XXXX)
-STRIPPED_DEPENDENCIES:=$(shell mktemp -u /tmp/$(APP).stripped_deps.XXXX)
-
 C_HEADERS = $(wildcard c_src/*.h)
 C_OBJECTS = $(patsubst %.c, %.o, $(wildcard c_src/*.c))
 UNAME := $(shell uname)
@@ -70,36 +69,18 @@ ifeq ($(UNAME), Linux)
 	MAKE_TARGET = ar rcs $(TARGET) $(OBJECTS)
 endif
 
-define compile_erl
-   $(verbose) echo Compiling...
-   $(verbose) sed 's/^/  /' $(ERLS_TO_BUILD)
-   $(verbose) erlc -pa ebin/ -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ `cat $(ERLS_TO_BUILD)`
-endef
+MODULES = $(notdir $(patsubst src/%.erl, %, $(wildcard src/*.erl) $(wildcard src/*/*.erl)))
+MODULES_LIST = $(subst $(space),$(comma),$(strip $(MODULES)))
+ERL_BEAMS = $(addprefix ebin/, $(addsuffix .beam, $(MODULES)))
 
-define build_dependencies
-   @# The makefile created by the -M flag uses line continuations for long lists of pre-requisites.
-   @# The awk command simply collapse each rule down to a single line.  Note the double '$' - this is
-   @# to handle make\'s escaping rules
-   $(verbose) erlc -o ebin/ -M $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ `cat $(ERLS_TO_BUILD)` | \
-      awk '/\\$$/ {printf("%s ", substr($$0, 1, length($$0) - 1)); next} // { print }' > $(CHANGED_DEPENDENCIES)
-   $(verbose) (grep -v -f $(BEAMS_BUILT) $(DEPENDENCIES) > $(STRIPPED_DEPENDENCIES); echo -n)
-   $(verbose) cat $(STRIPPED_DEPENDENCIES) $(CHANGED_DEPENDENCIES) | sed '/^$$/d' > $(DEPENDENCIES)
-   $(verbose) rm $(STRIPPED_DEPENDENCIES) $(CHANGED_DEPENDENCIES) $(ERLS_TO_BUILD) $(BEAMS_BUILT)
-endef
+OTHER_BEAMS = $(foreach ext, xrl yrl S core, $(addprefix ebin/, $(notdir $(patsubst src/%.$(ext), %.beam, $(wildcard src/*.$(ext)) $(wildcard src/*/*.$(ext))))))
 
-define build
-   $(call compile_erl)
-   $(call build_dependencies)
-endef
+DTS = $(patsubst templates/%.dtl, ebin/%_dtl.beam, $(wildcard templates/*.dtl))
 
-app: get-deps start-build ebin/$(APP).app \
-     $(foreach ext, erl xrl yrl S core, \
-	$(addprefix ebin/, $(notdir $(patsubst src/%.$(ext), %.beam, $(wildcard src/*.$(ext)) $(wildcard src/*/*.$(ext)))))) \
-     $(C_TARGET_NAME) \
-     $(patsubst templates/%.dtl, ebin/%_dtl.beam, $(wildcard templates/*.dtl)) | ebin/
-	$(if $(wildcard $(ERLS_TO_BUILD)), \
-		$(call build) \
-	)
+DEPENDENCIES = $(patsubst %.beam, %.d, $(ERL_BEAMS))
+
+app: get-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) | ebin/
+	@echo > /dev/null
 
 $(C_TARGET_NAME) : $(C_OBJECTS)
 	@if [ $(C_TARGET) == "static_library" ] ; then \
@@ -119,16 +100,16 @@ ebin/%.app: src/%.app.src                       | ebin/
 	@erl -noshell \
 	     -eval 'case file:consult("$<") of {ok,_}->ok; {error,{_,_,M}}->io:format("$<: ~s~s\n",M),halt(1) end.' \
 	     -s init stop
-	@cp $< $@
+	@sed 's/{modules,[[:space:]]*\[\]}/{modules, \[$(MODULES_LIST)\]}/' < $< > $@
 
-start-build:
-	@if [ ! -f $(DEPENDENCIES) ] ; then \
-		echo > $(DEPENDENCIES) ; \
-	fi
+ebin/%.d: $$(wildcard src/%.erl) $$(wildcard src/*/%.erl)   | ebin/
+	$(verbose) erlc -o ebin/ $(ERLCFLAGS) -Iinclude/ -I$(DEPS_DIR)/ -MP -MG -MF $@ $<
+	@gawk '/^[ \t]*-(behaviou?r\(|compile\({parse_transform,)/ {match($$0, /-(behaviou?r\([ \t]*([^) \t]+)|compile\({parse_transform,[ \t]*([^} \t]+))/, a); m = (a[2] a[3]); if (m != "" && ((system("ls src/" m ".erl 1>/dev/null 2>/dev/null") == 0) || (system("ls src/*/" m ".erl 1>/dev/null 2>/dev/null") == 0))) print "\nebin/$*.beam: ebin/" m ".beam"}' < $< >> $@
+
 
 ebin/%.beam: $$(wildcard src/%.erl) $$(wildcard src/*/%.erl)   | ebin/
-	@echo $< >> $(ERLS_TO_BUILD)
-	@echo $@ >> $(BEAMS_BUILT)
+	@echo $<
+	$(verbose) erlc -pa ebin/ -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
 
 ebin/%.beam: src/%.xrl $(wildcard include/*)    | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) $<
@@ -157,7 +138,7 @@ ebin/:
 
 -include $(DEPENDENCIES)
 
-.PHONY: app start-build
+.PHONY: app 
 
 ##------------------------------------------------------------------------------
 ## EUNIT 
@@ -333,7 +314,7 @@ update-deps: get-deps $(patsubst %,update-deps/%/,$(DEPS))
 clean-deps: get-deps $(patsubst %,clean-deps/%/,$(DEPS))
 
 deps-dir:
-	$(if $(wildcard $(DEPS_DIR)),,mkdir $(DEPS_DIR))
+	$(if $(wildcard $(DEPS_DIR)),,mkdir -p $(DEPS_DIR))
 
 $(FULL_DEPS):
 	$(call get_dep,$(@F),$(word 1,$(dep_$(@F))),$(word 2,$(dep_$(@F))))
