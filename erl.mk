@@ -45,7 +45,13 @@ $(APPS): erl.mk
 	fi
 
 $(addsuffix .%, $(APPS)) : 
-	$(MAKE) -C apps/$(word 1, $(subst ., , $@)) $*
+	$(eval AppName=$(word 1, $(subst ., , $@)))
+	echo $(AppName)
+	@if [ -f apps/$(AppName)/Makefile ] || [ -f apps/$(AppName)/makefile ] ; then \
+		$(MAKE) -C apps/$(AppName) $*; \
+	else \
+		$(MAKE) -C apps/$(AppName) -f ../../erl.mk $*; \
+	fi
 
 ##------------------------------------------------------------------------------
 ## COMPILE
@@ -243,8 +249,6 @@ export DEPS_DIR
 
 FULL_DEPS = $(addsuffix /, $(addprefix $(DEPS_DIR)/, $(DEPS)))
 
-REBAR_DEPS_DIR = $(DEPS_DIR)
-export REBAR_DEPS_DIR
 GLOBAL_REBAR = $(shell which rebar || echo "./rebar")
 
 define get_dep
@@ -273,13 +277,13 @@ define build_dep
 		fi \
 	fi ; \
 	echo BUILD $(1) - $(ERL_LIBS), $(DEPS_DIR) ; \
-	if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
-		echo 'make -C $(DEPS_DIR)/$(1)' ; \
-	       	make -C $(DEPS_DIR)/$(1)  ; \
+	if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]]; then \
+		echo 'cd $(DEPS_DIR)/$(1) && $THIS_REBAR get-deps compile && cd ../..' ; \
+		cd $(DEPS_DIR)/$(1) && $$THIS_REBAR deps_dir=$(DEPS_DIR) get-deps compile && cd ../.. ; \
 	else \
-		if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]]; then \
-			echo 'cd $(DEPS_DIR)/$(1) && $THIS_REBAR get-deps compile && cd ../..' ; \
-			cd $(DEPS_DIR)/$(1) && $$THIS_REBAR get-deps compile && cd ../.. ; \
+		if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
+			echo 'make -C $(DEPS_DIR)/$(1)' ; \
+		       	make -C $(DEPS_DIR)/$(1)  ; \
 		else \
 			make -C $(DEPS_DIR)/$(1) -f ../../erl.mk ; \
 		fi \
@@ -346,11 +350,19 @@ build-base-plt: | ~/plts
 ~/plts:
 	mkdir ~/plts
 
-build-plt: app
+build-plt: build-deps
 	@dialyzer -r $(DEPS_DIR) --add_to_plt --plt ~/plts/base.plt --output_plt dialyzer.plt
+
+ifeq ($(APP), )
+
+dialyzer: $(addsuffix .dialyzer, $(APPS))
+	@echo > /dev/null
+else
 
 dialyzer: all
 	dialyzer -r $(APP_DIRS) --plt dialyzer.plt -Wunmatched_returns -Werror_handling -Wrace_conditions --verbose
+
+endif
 
 .PHONY: build-base-plt build-plt dialyzer
 
