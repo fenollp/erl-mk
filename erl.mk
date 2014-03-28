@@ -291,8 +291,9 @@ endef
 define update_dep
 	@echo Updating $(1) / $(3) from $(2)
 	@cd $(DEPS_DIR)/$(1); \
-	git fetch $(2); \
-	git checkout -q $(3)
+	git fetch origin; \
+	git checkout $(3); \
+	git pull --ff-only --no-rebase origin $(3)
 endef
 
 define clean_dep
