@@ -165,13 +165,12 @@ endif
 
 eunit.%: app ebin/%.beam
 	@erl -noshell \
+	     -pa ebin/ -pa $(DEPS_DIR)/*/ebin/ \
 	     -eval 'eunit:test($*, [verbose]).' \
 	     -s init stop
 
-test/%_tests.beam: test/%_tests.erl
-	@erlc -o test/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
-
-.PRECIOUS: test/%.beam
+#test/%_tests.beam: test/%_tests.erl
+#	@erlc -o test/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
 
 .PHONY: eunit eunit.% eunit_start_message
 
