@@ -281,8 +281,7 @@ define build_dep
 			echo 'cd $(DEPS_DIR)/$(1) && $THIS_REBAR get-deps compile && cd ../..' ; \
 			cd $(DEPS_DIR)/$(1) && $$THIS_REBAR get-deps compile && cd ../.. ; \
 		else \
-			echo "Don't know how to build $(1) - no makefile or rebar.config" ; \
-			exit 1 ; \
+			make -C $(DEPS_DIR)/$(1) -f ../../erl.mk ; \
 		fi \
 	fi
 endef
