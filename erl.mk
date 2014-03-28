@@ -262,7 +262,7 @@ define get_dep
 endef
 
 define build_dep
-	@if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]] ; then \
+	if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]] ; then \
 		if [[ -f $(DEPS_DIR)/$(1)/rebar ]]; then \
 			export THIS_REBAR="./rebar"; \
 		else \
