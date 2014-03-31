@@ -9,6 +9,7 @@ SHELL = /bin/bash
 APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 APPS += $(notdir $(wildcard apps/*))
 DEPS_DIR ?= $(addsuffix /deps, $(realpath .))
+PROJECT_DIR = $(realpath $(addsuffix /.., $(DEPS_DIR)))
 ERL_LIBS := $(DEPS_DIR):$(realpath apps):$(ERL_LIBS)
 
 export DEPS_DIR
@@ -359,7 +360,8 @@ dialyzer: $(addsuffix .dialyzer, $(APPS))
 else
 
 dialyzer: all
-	dialyzer -r $(APP_DIRS) --plt dialyzer.plt -Wunmatched_returns -Werror_handling -Wrace_conditions --verbose
+	@echo Dialyzer $(APP)
+	dialyzer -r $(APP_DIRS) --plt $(PROJECT_DIR)/dialyzer.plt -Wunmatched_returns -Werror_handling -Wrace_conditions --verbose
 
 endif
 
