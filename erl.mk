@@ -46,7 +46,6 @@ $(APPS): erl.mk
 
 $(addsuffix .%, $(APPS)) : 
 	$(eval AppName=$(word 1, $(subst ., , $@)))
-	echo $(AppName)
 	@if [ -f apps/$(AppName)/Makefile ] || [ -f apps/$(AppName)/makefile ] ; then \
 		$(MAKE) -C apps/$(AppName) $*; \
 	else \
