@@ -369,6 +369,15 @@ endif
 ##------------------------------------------------------------------------------
 ## RELEASE
 ##------------------------------------------------------------------------------
+ifeq ($(APP), )
+
+rel: $(addsuffix .rel, $(APPS))
+	@echo > /dev/null
+
+clean-rel: $(addsuffix .clean-rel, $(APPS))
+	@echo > /dev/null
+
+else
 
 RELX_CONFIG ?= $(CURDIR)/relx.config
 
@@ -401,6 +410,8 @@ $(RELX):
 
 clean-rel:
 	@rm -rf _rel
+
+endif
 
 endif
 
