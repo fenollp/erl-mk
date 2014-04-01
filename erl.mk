@@ -9,6 +9,7 @@ SHELL = /bin/bash
 APP ?= $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 APPS += $(notdir $(wildcard apps/*))
 DEPS_DIR ?= $(addsuffix /deps, $(realpath .))
+NATIVE_DEPS_DIR ?= $(addsuffix /nativedeps, $(realpath .))
 PROJECT_DIR = $(realpath $(addsuffix /.., $(DEPS_DIR)))
 ERL_LIBS := $(DEPS_DIR):$(realpath apps):$(ERL_LIBS)
 
@@ -88,7 +89,10 @@ DEPENDENCIES = $(patsubst %.beam, %.d, $(ERL_BEAMS))
 app: get-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) | ebin/
 	@echo > /dev/null
 
-$(C_TARGET_NAME) : $(C_OBJECTS)
+$(dir $(C_TARGET_NAME)) :
+	@mkdir -p $(dir $(C_TARGET_NAME))
+
+$(C_TARGET_NAME) : $(C_OBJECTS) | $(dir $(C_TARGET_NAME))
 	@if [ $(C_TARGET) == "static_library" ] ; then \
 		echo Creating archive $(C_TARGET_NAME) ; \
 		ar rcs $(C_TARGET_NAME) $(C_OBJECTS) ; \
@@ -96,9 +100,6 @@ $(C_TARGET_NAME) : $(C_OBJECTS)
 		if [ $(C_TARGET) == "executable" ]; then \
 			echo Creating executable $(C_TARGET_NAME) ; \
 			$(CC) $(C_OBJECTS) $(LDFLAGS) -o $(C_TARGET_NAME) ; \
-		else \
-			echo Don\'t know how to build a $(C_TARGET); \
-			exit 1; \
 		fi \
 	fi
 
@@ -148,7 +149,7 @@ ebin/%_dtl.beam: templates/%.dtl                | ebin/
 	     -s init stop
 
 ebin/:
-	@mkdir ebin/
+	mkdir ebin/
 
 -include $(DEPENDENCIES)
 
@@ -286,7 +287,7 @@ define build_dep
 	fi ; \
 	echo BUILD $(1) - $(ERL_LIBS), $(DEPS_DIR) ; \
 	if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]]; then \
-		echo 'cd $(DEPS_DIR)/$(1) && $$THIS_REBAR get-deps compile && cd ../..' ; \
+		echo 'cd $(DEPS_DIR)/$(1) && $THIS_REBAR get-deps compile && cd ../..' ; \
 		cd $(DEPS_DIR)/$(1) && $$THIS_REBAR deps_dir=$(DEPS_DIR) get-deps compile && cd ../.. ; \
 	else \
 		if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
