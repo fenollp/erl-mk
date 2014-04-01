@@ -6,7 +6,7 @@
 
 SHELL = /bin/bash
 
-APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
+APP ?= $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 APPS += $(notdir $(wildcard apps/*))
 DEPS_DIR ?= $(addsuffix /deps, $(realpath .))
 PROJECT_DIR = $(realpath $(addsuffix /.., $(DEPS_DIR)))
@@ -40,17 +40,17 @@ apps : $(APPS)
 
 $(APPS): erl.mk
 	@if [ -f apps/$@/Makefile ] || [ -f apps/$@/makefile ] ; then \
-		$(MAKE) -C apps/$@; \
+		$(MAKE) -C apps/$@ APP=$@; \
 	else \
-		$(MAKE) -C apps/$@ -f ../../erl.mk; \
+		$(MAKE) -C apps/$@ -f ../../erl.mk APP=$@; \
 	fi
 
 $(addsuffix .%, $(APPS)) : 
 	$(eval AppName=$(word 1, $(subst ., , $@)))
 	@if [ -f apps/$(AppName)/Makefile ] || [ -f apps/$(AppName)/makefile ] ; then \
-		$(MAKE) -C apps/$(AppName) $*; \
+		$(MAKE) -C apps/$(AppName) APP=$(AppName) $*; \
 	else \
-		$(MAKE) -C apps/$(AppName) -f ../../erl.mk $*; \
+		$(MAKE) -C apps/$(AppName) -f ../../erl.mk APP=$(AppName) $*; \
 	fi
 
 ##------------------------------------------------------------------------------
@@ -102,11 +102,16 @@ $(C_TARGET_NAME) : $(C_OBJECTS)
 c_src/%.o: c_src/%.c $(C_HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-ebin/%.app: src/%.app.src                       | ebin/
-	@erl -noshell \
-	     -eval 'case file:consult("$<") of {ok,_}->ok; {error,{_,_,M}}->io:format("$<: ~s~s\n",M),halt(1) end.' \
-	     -s init stop
-	@sed 's/{modules,[[:space:]]*\[\]}/{modules, \[$(MODULES_LIST)\]}/' < $< > $@
+src/%.app.src:
+	@echo No $@ file - will continue, but you should probably make one...
+
+ebin/%.app: src/%.app.src | ebin/
+	@if [ -f $< ]; then \
+		erl -noshell \
+		     -eval 'case file:consult("$<") of {ok,_}->ok; {error,{_,_,M}}->io:format("$<: ~s~s\n",M),halt(1) end.' \
+		     -s init stop ; \
+		sed 's/{modules,[[:space:]]*\[\]}/{modules, \[$(MODULES_LIST)\]}/' < $< > $@ ; \
+	fi
 
 ebin/%.d: $$(wildcard src/%.erl) $$(wildcard src/*/%.erl)   | ebin/
 	$(verbose) erlc -o ebin/ $(ERLCFLAGS) -Iinclude/ -I$(DEPS_DIR)/ -MP -MG -MF $@ $<
