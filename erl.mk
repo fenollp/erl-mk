@@ -148,7 +148,7 @@ ebin/%_dtl.beam: templates/%.dtl                | ebin/
 	     -s init stop
 
 ebin/:
-	mkdir ebin/
+	@mkdir ebin/
 
 -include $(DEPENDENCIES)
 
