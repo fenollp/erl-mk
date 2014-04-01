@@ -1,5 +1,7 @@
 #erl-mk • [GitHub](//github.com/id3as/erl-mk)
 
+Makefile rules for building and testing Erlang applications, supports multiple applications inside the apps folder.
+
 Forked from [fenollp/erl-mk](https://github.com/fenollp/erl-mk), with inspiration from [erlang.mk](https://github.com/extend/erlang.mk) and [stdapp.mk](https://github.com/richcarl/stdapp.mk)
 
 
