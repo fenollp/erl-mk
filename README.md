@@ -66,7 +66,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make build-base-plt` | Makes a plt for the standard erl libraries into ~/plts/base.plt |
 | `make build-plt`      | Makes a plt for everything in `deps/`                           |
 | `make dialyzer`       | Runs dialyzer on the current project                            |
-| `make rel`            | Builds a release package with relx, using relx.config           |
+| `make rel`            | Uses `relx` to build a release package for each app in the apps subdirectory.  Each app needs its own `relx.config` file in the root of that application's directory (e.g. `apps/appname/relx.config`).  The releases are placed in `apps/appname/_rel`
 
 ### App directory structure support
 A lot of projects use a structure of
