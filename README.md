@@ -1,31 +1,29 @@
-#erl-mk • [GitHub](//github.com/fenollp/erl-mk)
+#erl-mk • [GitHub](//github.com/id3as/erl-mk)
+
+Forked from [https://github.com/fenollp/erl-mk], with inspiration from [erlang.mk](https://github.com/extend/erlang.mk) and [stdapp.mk](https://github.com/richcarl/stdapp.mk)
+
 
 Include this in your Makefile:
 ```make
-all: erl.mk
+export ERLCFLAGS = +debug_info +warn_export_vars +warn_shadow_vars +warn_obsolete_guard +'{lager_truncation_size, 10240}' 
+
+DEPS = gproc cowboy jsx
+dep_gproc = git://github.com/esl/gproc.git master
+dep_cowboy = git://github.com/extend/cowboy.git master
+dep_jsx = git://github.com/talentdeficit/jsx.git master
 
 erl.mk:
-	wget -nv -O erl.mk 'https://raw.github.com/id3as/erl-mk/master/erl.mk' || rm erl.mk
+	@wget -nv -O $@ 'https://raw.github.com/id3as/erl-mk/master/erl.mk' || rm -f $@
 
-DEPS =
-
-include erl.mk
+-include erl.mk
 
 # Your targets after this line.
 ```
 
-Now, `make -j`. This is the parallel exquivalent of `rebar -j get-deps compile`.
-
-## Why?
-* `rebar` is too slow for a tight dev-fail loop.
-* **erlang.mk** had too many [quirks](https://github.com/extend/erlang.mk/issues/21) and uses too many shell code & loops (ie slow again)
+Now, `make` or `make -j`.
 
 ## Usage
-**erl.mk** implements most of [erlang.mk](https://github.com/extend/erlang.mk)'s capabilities
-except the packaging stuff, and also some of `rebar`'s commands.
-Thus the compiling and dependency handling commands are available, but not ‹paste TODO›.  
-
-You should be all set with `make`, `make clean` and `make eunit`.
+You should be all set with `make`, `make clean`, `make eunit` and `make ct`.
 
 Dependency specification is the same as **erlang.mk**'s.
 ```make
@@ -33,7 +31,7 @@ DEPS = cowboy bullet
 dep_cowboy = https://github.com/extend/cowboy.git 0.8.4
 dep_bullet = https://github.com/extend/bullet.git 0.4.1
 ```
-…and that's all you'll have to put in your Makefile. Ever.
+…but without the packaging stuff.  Maybe that'll get added at some point...
 
 ### Compilation support
 | Pattern            | File type            |
@@ -45,41 +43,50 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `src/*.S`          | Erlang ASM code      |
 | `src/*.core`       | Erlang Core code     |
 | `templates/*.dtl`  | ErlyDTL templates    |
-| `test/*_tests.erl` | EUnit tests          |
 | `test/*_SUITE.erl` | Common Test tests    |
 
 ### API
-| `make` target     | Action                                                      |
-| ----------------- | ----------------------------------------------------------- |
-| `make all`        | ⇔ `make deps app`                                           |
-| `make deps`       | Fetch & compile dependencies and deps of deps, into `deps/` |
-| `make app`        | Compile files from `src/` | `templates/`                    |
-| `make eunit`      | Compile & EUnit-test files in `test/*_tests.erl`            |
-| `make eunit.Mod`  | Compile & EUnit-test code in `test/Mod_tests.erl`           |
-| `make ct`         | Compile & EUnit-test files in `test/*_SUITE.erl`            |
-| `make ct.Mod`     | Compile & CommonTest-test code in `test/Mod_SUITE.erl`      |
-| `make escript`    | Generate a stand-alone `escript` executable                 |
-| `make docs`       | Generate the app's documentation into `doc/`                |
-| `make clean-docs` | Remove `doc/{edoc-info,*.{css,html,png}}`                   |
-| `make clean`      | Remove `ebin/`                                              |
+| `make` target         | Action                                                          |
+| --------------------- | --------------------------------------------------------------- |
+| `make all`            | `make get-deps app`                                             |
+| `make get-deps`       | Fetch dependencies and deps of deps, into `deps/`               |
+| `make build-deps`     | Fetch & compile dependencies and deps of deps, into `deps/`     |
+| `make update-deps`    | Update dependencies and deps of deps, into `deps/`              |
+| `make app`            | Compile files from `src/` | `templates/`                        |
+| `make eunit`          | Compile & EUnit-test files in `src/*.erl`                       |
+| `make eunit.Mod`      | Compile & EUnit-test code in `src/Mod.erl`                      |
+| `make ct`             | Compile & EUnit-test files in `test/*_SUITE.erl`                |
+| `make ct.Mod`         | Compile & CommonTest-test code in `test/Mod_SUITE.erl`          |
+| `make escript`        | Generate a stand-alone `escript` executable                     |
+| `make docs`           | Generate the app's documentation into `doc/`                    |
+| `make clean-docs`     | Remove `doc/{edoc-info,*.{css,html,png}}`                       |
+| `make clean`          | Remove `ebin/`                                                  |
+| `make build-base-plt` | Makes a plt for the standard erl libraries into ~/plts/base.plt |
+| `make build-plt`      | Makes a plt for everything in `deps/`                           |
+| `make dialyzer`       | Runs dialyzer on the current project                            |
+| `make rel`            | Builds a release package with relx, using relx.config           |
 
-## Differences with erlang.mk
-* Compatible with deps that use a Makefile or `rebar`
-* Automatic discovery of files given that project respects OTP directory structure
-* Makes use of `make`'s fast dependency graph and parallelisation
-* Much simpler design (as far as Makefiles go)
-* No PROJECT variable needed, does not depend on wget
-* Uses relative paths, thus no trouble with folders' name containing whitespaces
+### App directory structure support
+A lot of project use a structure of
+
+```
+root
+	apps
+		app1
+			src
+			include
+			ebin
+		app2
+			src
+			include
+			ebin
+	deps
+		dep1
+		dep2
+```
+
+`erl.mk` supports these - just put the root makefile (the example above would work) at the root of the tree.  Then the commands listed above should be applied to each application in the `apps` directory
+
 
 ## TODO
-**erl.mk** is meant to replace **erlang.mk** and `rebar`'s compile commands. However, one should still use `rebar` and `relx` for something other than compilation.
-* Support the generic arch (eg. apps/, …)
-* Proper compilation of `ct` target's files (ie `-no_auto_compile` issue)
-* Do | Document the ≠ ENV variables available.
-
-## ¬TODO
-* `relx`|`rebar` download tool | wrapper
-* Dialyzer wrapper
-
-# Contact
-Please [report issues](https://github.com/fenollp/erl-mk/issues) and do a lot of [Pull Requests](https://github.com/fenollp/erl-mk/pulls).
+* Lots of stuff!  Pull requests most welcome
