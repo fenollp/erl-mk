@@ -1,6 +1,6 @@
 #erl-mk • [GitHub](//github.com/id3as/erl-mk)
 
-Forked from [https://github.com/fenollp/erl-mk], with inspiration from [erlang.mk](https://github.com/extend/erlang.mk) and [stdapp.mk](https://github.com/richcarl/stdapp.mk)
+Forked from [fenollp/erl-mk](https://github.com/fenollp/erl-mk), with inspiration from [erlang.mk](https://github.com/extend/erlang.mk) and [stdapp.mk](https://github.com/richcarl/stdapp.mk)
 
 
 Include this in your Makefile:
