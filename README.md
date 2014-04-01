@@ -67,10 +67,10 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make rel`            | Builds a release package with relx, using relx.config           |
 
 ### App directory structure support
-A lot of project use a structure of
+A lot of projects use a structure of
 
 ```
-root
+project
 	apps
 		app1
 			src
@@ -85,8 +85,14 @@ root
 		dep2
 ```
 
-`erl.mk` supports these - just put the root makefile (the example above would work) at the root of the tree.  Then the commands listed above should be applied to each application in the `apps` directory
+`erl.mk` supports these - just put the root makefile (the example above would work) at the root of the tree.  Then the commands listed above should be applied to each application in the `apps` directory.  You can also do things like:
 
+```
+make app1.ct		# just run the common test suites for app1
+make app1.eunit.foo	# just run the eunit tests in the foo module in app1
+```
+
+Basically any of the above commands can have ```appname.``` prepended, and they will apply to just that application.
 
 ## TODO
 * Lots of stuff!  Pull requests most welcome
