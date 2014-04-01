@@ -4,6 +4,26 @@ Makefile rules for building and testing Erlang applications, supports multiple a
 
 Forked from [fenollp/erl-mk](https://github.com/fenollp/erl-mk), with inspiration from [erlang.mk](https://github.com/extend/erlang.mk) and [stdapp.mk](https://github.com/richcarl/stdapp.mk)
 
+### App directory structure support
+A lot of Erlang projects use a structure of
+
+```
+project
+	apps
+		app1
+			src
+			include
+			ebin
+		app2
+			src
+			include
+			ebin
+	deps
+		dep1
+		dep2
+```
+
+`erl.mk` supports these - just put a makefile (the example just below works on its own or makes a great starting point) at the root of the tree.  Then the commands listed below would be applied to each application in the `apps` directory.  
 
 Include this in your Makefile:
 ```make
@@ -22,7 +42,7 @@ erl.mk:
 # Your targets after this line.
 ```
 
-Now, `make` or `make -j`.
+Now, `make` or `make -j` (for parallel running).
 
 ## Usage
 You should be all set with `make`, `make clean`, `make eunit` and `make ct`.
@@ -68,33 +88,14 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make dialyzer`       | Runs dialyzer on the current project                            |
 | `make rel`            | Uses `relx` to build a release package for each app in the apps subdirectory.  Each app needs its own `relx.config` file in the root of that application's directory (e.g. `apps/appname/relx.config`).  The releases are placed in `apps/appname/_rel`
 
-### App directory structure support
-A lot of projects use a structure of
-
-```
-project
-	apps
-		app1
-			src
-			include
-			ebin
-		app2
-			src
-			include
-			ebin
-	deps
-		dep1
-		dep2
-```
-
-`erl.mk` supports these - just put the root makefile (the example above would work) at the root of the tree.  Then the commands listed above should be applied to each application in the `apps` directory.  You can also do things like:
+### Restricting actions to specific apps
+Basically any of the above commands can have ```appname.``` prepended, and they will apply to just that application.
+So you can also do things like:
 
 ```
 make app1.ct		# just run the common test suites for app1
 make app1.eunit.foo	# just run the eunit tests in the foo module in app1
 ```
-
-Basically any of the above commands can have ```appname.``` prepended, and they will apply to just that application.
 
 ## TODO
 * Lots of stuff!  Pull requests most welcome
