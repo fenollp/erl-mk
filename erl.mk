@@ -390,14 +390,13 @@ RELX_CONFIG ?= $(CURDIR)/relx.config
 ifeq ($(wildcard $(RELX_CONFIG)),)
 
 rel:
-	@echo ERROR: No relx.config found at $(RELX_CONFIG) - if it\'s in a non-standard place, then set the RELX_CONFIG variable.
-	@exit 1
+	@echo Warning: No relx.config found at $(RELX_CONFIG) - skipping $(APP)
 
 clean-rel:
 
 else
 
-RELX ?= $(CURDIR)/relx
+RELX ?= $(PROJECT_DIR)/relx
 export RELX
 
 RELX_URL ?= https://github.com/erlware/relx/releases/download/v0.5.2/relx
