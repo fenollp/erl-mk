@@ -150,7 +150,9 @@ ebin/%_dtl.beam: templates/%.dtl                | ebin/
 ebin/:
 	@mkdir ebin/
 
--include $(DEPENDENCIES)
+ifneq ($(MAKECMDGOALS),clean)
+	-include $(DEPENDENCIES)
+endif
 
 .PHONY: app 
 
