@@ -96,6 +96,9 @@ $(C_TARGET_NAME) : $(C_OBJECTS)
 		if [ $(C_TARGET) == "executable" ]; then \
 			echo Creating executable $(C_TARGET_NAME) ; \
 			$(CC) $(C_OBJECTS) $(LDFLAGS) -o $(C_TARGET_NAME) ; \
+		else \
+			echo Don\'t know how to build a $(C_TARGET); \
+			exit 1; \
 		fi \
 	fi
 
@@ -283,7 +286,7 @@ define build_dep
 	fi ; \
 	echo BUILD $(1) - $(ERL_LIBS), $(DEPS_DIR) ; \
 	if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]]; then \
-		echo 'cd $(DEPS_DIR)/$(1) && $THIS_REBAR get-deps compile && cd ../..' ; \
+		echo 'cd $(DEPS_DIR)/$(1) && $$THIS_REBAR get-deps compile && cd ../..' ; \
 		cd $(DEPS_DIR)/$(1) && $$THIS_REBAR deps_dir=$(DEPS_DIR) get-deps compile && cd ../.. ; \
 	else \
 		if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
@@ -390,14 +393,13 @@ RELX_CONFIG ?= $(CURDIR)/relx.config
 ifeq ($(wildcard $(RELX_CONFIG)),)
 
 rel:
-	@echo ERROR: No relx.config found at $(RELX_CONFIG) - if it\'s in a non-standard place, then set the RELX_CONFIG variable.
-	@exit 1
+	@echo Warning: No relx.config found at $(RELX_CONFIG) - skipping $(APP)
 
 clean-rel:
 
 else
 
-RELX ?= $(CURDIR)/relx
+RELX ?= $(PROJECT_DIR)/relx
 export RELX
 
 RELX_URL ?= https://github.com/erlware/relx/releases/download/v0.5.2/relx
