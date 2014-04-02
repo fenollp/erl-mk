@@ -432,9 +432,10 @@ endif
 ## CLEAN
 ##------------------------------------------------------------------------------
 clean:
-	@rm -f $(DEPENDENCIES)
 	@rm -rf ebin/*
+	@rm -rf apps/*/ebin/*
 	@rm -f test/*.beam
+	@rm -f apps/*/test/*.beam
 
 clean-docs:
 	$(if $(wildcard doc/*.css),     rm doc/*.css)
