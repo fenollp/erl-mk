@@ -40,7 +40,6 @@ apps : $(APPS)
 	@echo > /dev/null
 
 $(APPS): erl.mk
-	echo RECURSE FOR $@
 	@if [ -f apps/$@/Makefile ] || [ -f apps/$@/makefile ] ; then \
 		$(MAKE) -C apps/$@ APP=$@; \
 	else \
@@ -91,10 +90,7 @@ DTS = $(patsubst templates/%.dtl, ebin/%_dtl.beam, $(wildcard templates/*.dtl))
 
 DEPENDENCIES = $(patsubst %.beam, %.d, $(ERL_BEAMS))
 
-build-message:
-	@echo Building $(APP)
-
-app: build-message get-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) | ebin/
+app: get-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) | ebin/
 	@echo > /dev/null
 
 $(dir $(C_TARGET_NAME)) :
