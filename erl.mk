@@ -152,7 +152,7 @@ ebin/:
 	mkdir ebin/
 
 ifneq ($(MAKECMDGOALS),clean)
-	-include $(DEPENDENCIES)
+-include $(DEPENDENCIES)
 endif
 
 .PHONY: app 
