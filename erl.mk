@@ -40,19 +40,24 @@ apps : $(APPS)
 	@echo > /dev/null
 
 $(APPS): erl.mk
+	echo RECURSE FOR $@
 	@if [ -f apps/$@/Makefile ] || [ -f apps/$@/makefile ] ; then \
 		$(MAKE) -C apps/$@ APP=$@; \
 	else \
 		$(MAKE) -C apps/$@ -f ../../erl.mk APP=$@; \
 	fi
 
-$(addsuffix .%, $(APPS)) : 
-	$(eval AppName=$(word 1, $(subst ., , $@)))
-	@if [ -f apps/$(AppName)/Makefile ] || [ -f apps/$(AppName)/makefile ] ; then \
-		$(MAKE) -C apps/$(AppName) APP=$(AppName) $*; \
+define app_target
+$(1): 
+	$$(eval AppName=$$(word 1, $$(subst ., , $$@)))
+	@if [ -f apps/$$(AppName)/Makefile ] || [ -f apps/$$(AppName)/makefile ] ; then \
+		$$(MAKE) -C apps/$$(AppName) APP=$$(AppName) $$*; \
 	else \
-		$(MAKE) -C apps/$(AppName) -f ../../erl.mk APP=$(AppName) $*; \
+		$$(MAKE) -C apps/$$(AppName) -f ../../erl.mk APP=$$(AppName) $$*; \
 	fi
+endef
+
+$(foreach app,$(addsuffix .%, $(APPS)),$(eval $(call app_target, $(app))))
 
 ##------------------------------------------------------------------------------
 ## COMPILE
@@ -86,7 +91,10 @@ DTS = $(patsubst templates/%.dtl, ebin/%_dtl.beam, $(wildcard templates/*.dtl))
 
 DEPENDENCIES = $(patsubst %.beam, %.d, $(ERL_BEAMS))
 
-app: get-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) | ebin/
+build-message:
+	@echo Building $(APP)
+
+app: build-message get-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) | ebin/
 	@echo > /dev/null
 
 $(dir $(C_TARGET_NAME)) :
@@ -152,7 +160,7 @@ ebin/:
 	mkdir ebin/
 
 ifneq ($(MAKECMDGOALS),clean)
--include $(DEPENDENCIES)
+	-include $(DEPENDENCIES)
 endif
 
 .PHONY: app 
@@ -164,6 +172,7 @@ ifeq ($(APP), )
 
 eunit: $(addsuffix .eunit, $(APPS))
 	@echo > /dev/null
+
 else
 
 TESTS = $(foreach ext, erl, $(addprefix eunit., $(notdir $(patsubst src/%.$(ext), %, $(wildcard src/*.$(ext)) $(wildcard src/*/*.$(ext))))))
@@ -178,7 +187,6 @@ eunit: eunit_start_message $(TESTS)
 	@echo ------------------------------------------------------------
 	@echo eunit tests completed for $(APP)
 	@echo ------------------------------------------------------------
-endif
 
 eunit.%: app ebin/%.beam
 	@erl -noshell \
@@ -190,6 +198,8 @@ eunit.%: app ebin/%.beam
 #	@erlc -o test/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
 
 .PHONY: eunit eunit.% eunit_start_message
+
+endif
 
 ##------------------------------------------------------------------------------
 ## CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl).
