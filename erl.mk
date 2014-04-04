@@ -14,6 +14,7 @@ PROJECT_DIR = $(realpath $(addsuffix /.., $(DEPS_DIR)))
 ERL_LIBS := $(DEPS_DIR):$(realpath apps):$(ERL_LIBS)
 
 export DEPS_DIR
+export NATIVE_DEPS_DIR
 export ERL_LIBS
 
 ifeq ($(APP), )
@@ -61,23 +62,20 @@ $(foreach app,$(addsuffix .%, $(APPS)),$(eval $(call app_target, $(app))))
 ##------------------------------------------------------------------------------
 ## COMPILE
 ##------------------------------------------------------------------------------
+CC ?= gcc
 C_HEADERS = $(wildcard c_src/*.h)
 C_OBJECTS = $(patsubst %.c, %.o, $(wildcard c_src/*.c))
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Darwin)
-	ERL_DIR = $(shell erl -noshell -eval 'io:format("~s~n", [code:lib_dir(erl_interface)])' -eval 'init:stop()')
-	CFLAGS += -I $(ERL_DIR)/include
-	LDFLAGS += -L /usr/local/lib -L $(ERL_DIR)/lib -lei
-	TARGET = priv/video_capture
-	MAKE_TARGET = ar rcs $(TARGET) $(OBJECTS)
+	ERL_DIR = $(shell erl -noshell -eval 'io:format("~s~n", [code:root_dir()])' -eval 'init:stop()')
+	CFLAGS += -I $(ERL_DIR)/usr/include
+	LDFLAGS := -L /usr/local/lib -L $(ERL_DIR)/usr/lib -lei $(LDFLAGS)
 endif
 ifeq ($(UNAME), Linux)
-	ERL_DIR = $(shell erl -noshell -eval 'io:format("~s~n", [code:lib_dir(erl_interface)])' -eval 'init:stop()')
-	CFLAGS += -I $(ERL_DIR)/include
-	LDFLAGS += -L /usr/local/lib -L $(ERL_DIR)/lib -lei
-	TARGET = priv/video_capture
-	MAKE_TARGET = ar rcs $(TARGET) $(OBJECTS)
+	ERL_DIR = $(shell erl -noshell -eval 'io:format("~s~n", [code:root_dir()])' -eval 'init:stop()')
+	CFLAGS += -I $(ERL_DIR)/usr/include
+	LDFLAGS := -L /usr/local/lib -L $(ERL_DIR)/usr/lib -lei $(LDFLAGS)
 endif
 
 MODULES = $(notdir $(patsubst src/%.erl, %, $(wildcard src/*.erl) $(wildcard src/*/*.erl)))
@@ -101,9 +99,14 @@ $(C_TARGET_NAME) : $(C_OBJECTS) | $(dir $(C_TARGET_NAME))
 		echo Creating archive $(C_TARGET_NAME) ; \
 		ar rcs $(C_TARGET_NAME) $(C_OBJECTS) ; \
 	else \
-		if [ $(C_TARGET) == "executable" ]; then \
-			echo Creating executable $(C_TARGET_NAME) ; \
-			$(CC) $(C_OBJECTS) $(LDFLAGS) -o $(C_TARGET_NAME) ; \
+		if [ $(C_TARGET) == "shared_library" ]; then \
+			echo Creating shared library $(C_TARGET_NAME) ; \
+			$(CC) $(C_OBJECTS) -fpic -o $(C_TARGET_NAME) $(LDFLAGS) ; \
+		else \
+			if [ $(C_TARGET) == "executable" ]; then \
+				echo Creating executable $(C_TARGET_NAME) ; \
+				$(CC) $(C_OBJECTS) $(LDFLAGS) -o $(C_TARGET_NAME) ; \
+			fi \
 		fi \
 	fi
 
