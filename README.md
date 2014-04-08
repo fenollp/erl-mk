@@ -7,8 +7,6 @@ all: erl.mk
 erl.mk:
 	wget -nv -O erl.mk 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm erl.mk
 
-DEPS =
-
 include erl.mk
 
 # Your targets after this line.
@@ -31,7 +29,6 @@ You should be all set with `make`, `make clean` and `make eunit`.
 
 Dependency specification is the same as **erlang.mk**'s.
 ```make
-DEPS = cowboy bullet
 dep_cowboy = https://github.com/extend/cowboy.git 0.8.4
 dep_bullet = https://github.com/extend/bullet.git 0.4.1
 ```
