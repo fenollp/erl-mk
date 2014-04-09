@@ -13,14 +13,32 @@ deps : $(patsubst dep_%,deps/%/,$(filter dep_%,$(.VARIABLES)))    | deps-dir
 deps-dir:
 	$(if $(wildcard deps/),,mkdir deps/)
 
+lel = https://github.com/fenollp/erl-mk.git fenollp erl-mk master
+lel = https://github.com/fenollp/erl-mk.git master
+# git@github.com/fenollp/erl-mk.git https://github.com/fenollp/erl-mk
+# https://github.com/fenollp/erl-mk/archive/master.zip
 deps/%/:
-	git clone -n -- $(word 1,$(dep_$*)) $@
-	cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../..
-	@if [[ -f $@/Makefile ]]; \
-	then echo 'make -C $@ all' ; \
-	           make -C $@ all  ; \
-	else echo 'cd $@ && rebar get-deps compile && cd ../..' ; \
-	           cd $@ && rebar get-deps compile && cd ../..  ; fi
+	if [[ $(words $(dep_$*)) = 4 ]]; then \
+	    case $(word 1,$(dep_$*)) in \
+	    *github.com*) \
+	        curl -sS 'https://codeload.github.com/$(word 2,$(dep_$*))/$(word 3,$(dep_$*))/zip/$(word 4,$(dep_$*))' -o deps/$*.zip ; \
+	        unzip -q deps/$*.zip -d deps/ && rm deps/$*.zip && mv 'deps/$(word 3,$(dep_$*))-$(word 4,$(dep_$*))' 'deps/$(word 3,$(dep_$*))' ; \
+	    ;; *) \
+	        git archive --format tar --remote $(word 1,$(dep_$*)) $(word 2,$(dep_$*)) deps/$*.tar && \
+	        tar xvf deps/$*.tar && rm deps/$*.tar \
+	        || git clone -n -- $(word 1,$(dep_$*)) $@ && \
+	        cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../.. \
+	    esac \
+	else \
+	    git clone -n -- $(word 1,$(dep_$*)) $@ && \
+	    cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../.. ; \
+	fi
+	@exit 1
+	if [[ -f $@/Makefile ]]; \
+	 then echo 'make -C $@ all' ; \
+	            make -C $@ all  ; \
+	 else echo 'cd $@ && rebar get-deps compile && cd ../..' ; \
+	            cd $@ && rebar get-deps compile && cd ../..  ; fi
 
 ### APP -- Compiles src/ into ebin/
 
