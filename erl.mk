@@ -158,7 +158,8 @@ ebin/%_dtl.beam: templates/%.dtl                | ebin/
 ebin/:
 	mkdir ebin/
 
-ifneq ($(MAKECMDGOALS),clean)
+# Only calculate module dependencies if we are not doing a make clean of some sort
+ifeq (,$(findstring ___clean,___$(MAKECMDGOALS)))
 -include $(DEPENDENCIES)
 endif
 
