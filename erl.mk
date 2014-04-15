@@ -16,11 +16,11 @@ deps-dir:
 deps/%/:
 	git clone -n -- $(word 1,$(dep_$*)) $@
 	cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../..
-	@if [[ -f $@/Makefile ]]; \
+	@bash -c "if [[ -f $@/Makefile ]]; \
 	then echo 'make -C $@ all' ; \
 	           make -C $@ all  ; \
 	else echo 'cd $@ && rebar get-deps compile && cd ../..' ; \
-	           cd $@ && rebar get-deps compile && cd ../..  ; fi
+	           cd $@ && rebar get-deps compile && cd ../..  ; fi"
 
 ### APP -- Compiles src/ into ebin/
 
@@ -129,7 +129,7 @@ clean-docs:
 	$(if $(wildcard doc/*.html),    rm doc/*.html)
 	$(if $(wildcard doc/*.png),     rm doc/*.png)
 	$(if $(wildcard doc/edoc-info), rm doc/edoc-info)
-	@[[ -d doc/ ]] && [[ 'doc/*' = "`echo doc/*`" ]] && rmdir doc/ || true
+	@bash -c '[[ -d doc/ ]] && [[ ''doc/*'' = "`echo doc/*`" ]] && rmdir doc/ || true'
 .PHONY: clean-docs
 
 ### CLEAN -- Removes ebin/
