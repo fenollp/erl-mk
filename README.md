@@ -5,7 +5,7 @@ Include this in your Makefile:
 all: erl.mk
 
 erl.mk:
-	wget -nv -O erl.mk 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm erl.mk
+	curl -sSo erl.mk 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm erl.mk
 
 include erl.mk
 
@@ -67,7 +67,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 * Automatic discovery of files given that project respects OTP directory structure
 * Makes use of `make`'s fast dependency graph and parallelisation
 * Much simpler design (as far as Makefiles go)
-* No PROJECT variable needed, does not depend on wget
+* No PROJECT variable needed, does not depend on `wget`
 * Uses relative paths, thus no trouble with folders' name containing whitespaces
 
 ## TODO
