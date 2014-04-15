@@ -6,8 +6,8 @@ APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 ### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
 
 deps : $(patsubst dep_%,deps/%/,$(filter dep_%,$(.VARIABLES)))    | deps-dir
-	$(if $(shell [[ 'deps/*/deps/*' != "`echo deps/*/deps/*`" ]] && echo y), \
-	    mv -v deps/*/deps/* deps/ && rmdir $(wildcard deps/*/deps/))
+	$(if $(wildcard deps/*/deps/), \
+	    mv -v deps/*/deps/* deps/ 2>/dev/null ; rmdir $(wildcard deps/*/deps/))
 .PHONY: deps
 
 deps-dir:
