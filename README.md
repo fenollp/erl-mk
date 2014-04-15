@@ -72,9 +72,12 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 
 ## TODO
 **erl.mk** is meant to replace **erlang.mk** and `rebar`'s compile commands. However, one should still use `rebar` and `relx` for something other than compilation.
-* Support the generic arch (eg. apps/, …)
+* Support the generic arch (eg. `apps/`, …)
 * Proper compilation of `ct` target's files (ie `-no_auto_compile` issue)
 * Do | Document the ≠ ENV variables available.
+* Fix `escript`: include HRLs, SOs & `deps/`.
+* Complete optional `dep_*` notation retrieving snapshots instead of whole git repos.
+
 
 ## ¬TODO
 * `relx`|`rebar` download tool | wrapper
