@@ -54,7 +54,7 @@ ebin/%.beam: src/%.core $(wildcard include/*)   | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -Ideps/ $<
 
 ebin/%_dtl.beam: templates/%.dtl                | ebin/
-	$(if $(shell [[ ! -d deps/erlydtl ]] && echo y), \
+	$(if $(wildcard deps/erlydtl/),, \
 	    $(error Error compiling $<: deps/erlydtl/ not found))
 	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
 	     -eval 'io:format("Compiling ErlyDTL template: $< -> $@\n").' \
