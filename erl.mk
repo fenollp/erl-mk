@@ -108,7 +108,7 @@ logs/:
 escript: | all
 	@erl -noshell \
 	     -eval 'io:format("Compiling escript \"./$(APP)\".\n").' \
-	     -eval 'escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $(APP)"}, {archive, [{case F of "ebin/"++E -> E; "deps/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("deps/*/ebin/*")], []}]).' \
+	     -eval 'G = fun (_, [], Acc) -> Acc; (F, [Path|Rest], Acc) -> case filelib:is_dir(Path) of false -> F(F, Rest, [Path|Acc]); true -> case Path of "./.git" -> F(F, Rest, Acc); _ -> {ok, Listing} = file:list_dir(Path), Paths = [filename:join(Path, Name) || Name <- Listing], F(F, Paths ++ Rest, Acc) end end end, escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $(APP) -pa ebin -pa $(wildcard deps/*/ebin)"}, {archive, [{File,element(2,file:read_file(File))} || File <- G(G, ["."], [])], []}]).' \
 	     -eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
 	     -s init stop
 
