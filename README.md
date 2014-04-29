@@ -14,20 +14,22 @@ project
 			src
 			include
 			ebin
+      mibs
 		app2
 			src
 			include
 			ebin
+      mibs
 	deps
 		dep1
 		dep2
 ```
 
-`erl.mk` supports these - just put a makefile (the example just below works on its own or makes a great starting point) at the root of the tree.  Then the commands listed below would be applied to each application in the `apps` directory.  
+`erl.mk` supports these - just put a makefile (the example just below works on its own or makes a great starting point) at the root of the tree.  Then the commands listed below would be applied to each application in the `apps` directory.
 
 Include this in your Makefile:
 ```make
-export ERLCFLAGS = +debug_info +warn_export_vars +warn_shadow_vars +warn_obsolete_guard +'{lager_truncation_size, 10240}' 
+export ERLCFLAGS = +debug_info +warn_export_vars +warn_shadow_vars +warn_obsolete_guard +'{lager_truncation_size, 10240}'
 
 DEPS = gproc cowboy jsx
 dep_gproc = git://github.com/esl/gproc.git master
@@ -64,6 +66,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `src/*.yrl`        | YECC code            |
 | `src/*.S`          | Erlang ASM code      |
 | `src/*.core`       | Erlang Core code     |
+| `mibs/*.mib`       | MIB files            |
 | `templates/*.dtl`  | ErlyDTL templates    |
 | `test/*_SUITE.erl` | Common Test tests    |
 
