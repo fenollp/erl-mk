@@ -12,6 +12,7 @@ DEPS_DIR ?= $(addsuffix /deps, $(realpath .))
 NATIVE_DEPS_DIR ?= $(addsuffix /nativedeps, $(realpath .))
 PROJECT_DIR = $(realpath $(addsuffix /.., $(DEPS_DIR)))
 ERL_LIBS := $(DEPS_DIR):$(realpath apps):$(ERL_LIBS)
+MIB_INCLUDES ?= $(addprefix -I, $(patsubst %/mibs, %/priv/mibs, $(wildcard $(DEPS_DIR)/*/mibs)))
 
 export DEPS_DIR
 export NATIVE_DEPS_DIR
@@ -48,7 +49,7 @@ $(APPS): erl.mk
 	fi
 
 define app_target
-$(1): 
+$(1):
 	$$(eval AppName=$$(word 1, $$(subst ., , $$@)))
 	@if [ -f apps/$$(AppName)/Makefile ] || [ -f apps/$$(AppName)/makefile ] ; then \
 		$$(MAKE) -C apps/$$(AppName) APP=$$(AppName) $$*; \
@@ -84,11 +85,13 @@ ERL_BEAMS = $(addprefix ebin/, $(addsuffix .beam, $(MODULES)))
 
 OTHER_BEAMS = $(foreach ext, xrl yrl S core, $(addprefix ebin/, $(notdir $(patsubst src/%.$(ext), %.beam, $(wildcard src/*.$(ext)) $(wildcard src/*/*.$(ext))))))
 
+MIBS = $(patsubst mibs/%.mib, priv/mibs/%.bin, $(wildcard mibs/*.mib))
+
 DTS = $(patsubst templates/%.dtl, ebin/%_dtl.beam, $(wildcard templates/*.dtl))
 
 DEPENDENCIES = $(patsubst %.beam, %.d, $(ERL_BEAMS))
 
-app: get-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) | ebin/
+app: get-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) $(MIBS) | ebin/
 	@echo > /dev/null
 
 $(dir $(C_TARGET_NAME)) :
@@ -147,6 +150,9 @@ ebin/%.beam: src/%.S $(wildcard include/*)      | ebin/
 ebin/%.beam: src/%.core $(wildcard include/*)   | ebin/
 	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -I$(DEPS_DIR)/ $<
 
+priv/mibs/%.bin: mibs/%.mib                     | priv/mibs
+	$(verbose) erlc -pa ebin/ -o priv/mibs $(MIB_INCLUDES) $(ERLMIBFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
+
 ebin/%_dtl.beam: templates/%.dtl                | ebin/
 	$(if $(shell [[ ! -d $(DEPS_DIR)/erlydtl ]] && echo y), \
 	    $(error Error compiling $<: $(DEPS_DIR)/erlydtl/ not found))
@@ -158,15 +164,18 @@ ebin/%_dtl.beam: templates/%.dtl                | ebin/
 ebin/:
 	mkdir ebin/
 
+priv/mibs:
+	mkdir -p priv/mibs
+
 # Only calculate module dependencies if we are not doing a make clean of some sort
 ifeq (,$(findstring ___clean,___$(MAKECMDGOALS)))
 -include $(DEPENDENCIES)
 endif
 
-.PHONY: app 
+.PHONY: app
 
 ##------------------------------------------------------------------------------
-## EUNIT 
+## EUNIT
 ##------------------------------------------------------------------------------
 ifeq ($(APP), )
 
@@ -221,7 +230,7 @@ ct: ct_start_message $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.
 	@echo ------------------------------------------------------------
 	@echo ct tests completed for $(APP)
 	@echo ------------------------------------------------------------
-endif 
+endif
 
 ct.%: app test/%_SUITE.beam                 | logs/
 	@ct_run -noshell -dir test/ -logdir logs/ \
