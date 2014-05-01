@@ -1,5 +1,4 @@
 .SECONDEXPANSION:
-
 ##------------------------------------------------------------------------------
 ## GENERAL
 ##------------------------------------------------------------------------------
@@ -122,8 +121,8 @@ src/%.app.src:
 ebin/%.app: src/%.app.src | ebin/
 	@if [ -f $< ]; then \
 		erl -noshell \
-		     -eval 'case file:consult("$<") of {ok,_}->ok; {error,{_,_,M}}->io:format("$<: ~s~s\n",M),halt(1) end.' \
-		     -s init stop ; \
+			-eval 'case file:consult("$<") of {ok,_}->ok; {error,{_,_,M}}->io:format("$<: ~s~s\n",M),halt(1) end.' \
+			-s init stop ; \
 		sed 's/{modules,[[:space:]]*\[\]}/{modules, \[$(MODULES_LIST)\]}/' < $< > $@ ; \
 	fi
 
@@ -155,11 +154,11 @@ priv/mibs/%.bin: mibs/%.mib                     | priv/mibs
 
 ebin/%_dtl.beam: templates/%.dtl                | ebin/
 	$(if $(shell [[ ! -d $(DEPS_DIR)/erlydtl ]] && echo y), \
-	    $(error Error compiling $<: $(DEPS_DIR)/erlydtl/ not found))
+		$(error Error compiling $<: $(DEPS_DIR)/erlydtl/ not found))
 	@erl -noshell -pa ebin/ -pa $(DEPS_DIR)/*/ebin/ \
-	     -eval 'io:format("Compiling ErlyDTL template $<\n").' \
-	     -eval 'erlydtl:compile("$<", $*_dtl, [{out_dir,"ebin/"}]).' \
-	     -s init stop
+		-eval 'io:format("Compiling ErlyDTL template $<\n").' \
+		-eval 'erlydtl:compile("$<", $*_dtl, [{out_dir,"ebin/"}]).' \
+		-s init stop
 
 ebin/:
 	mkdir ebin/
@@ -199,9 +198,9 @@ eunit: eunit_start_message $(TESTS)
 
 eunit.%: app ebin/%.beam
 	@erl -noshell \
-	     -pa ebin/ -pa $(DEPS_DIR)/*/ebin/ \
-	     -eval 'eunit:test($*, [verbose]).' \
-	     -s init stop
+		-pa ebin/ -pa $(DEPS_DIR)/*/ebin/ \
+		-eval 'eunit:test($*, [verbose]).' \
+		-s init stop
 
 #test/%_tests.beam: test/%_tests.erl
 #	@erlc -o test/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
@@ -235,8 +234,8 @@ endif
 ct.%: app test/%_SUITE.beam                 | logs/
 	@ct_run -noshell -dir test/ -logdir logs/ \
 		-no_auto_compile \
-	        -pa ebin/ -pa $(wildcard $(shell pwd)/deps/*/ebin/) \
-	        -suite $*_SUITE || true
+			-pa ebin/ -pa $(wildcard $(shell pwd)/deps/*/ebin/) \
+			-suite $*_SUITE || true
 
 test/%_SUITE.beam: test/%_SUITE.erl
 	@erlc -o test/ $(ERLCFLAGS) -v -Iinclude/ -I$(DEPS_DIR)/ $<
@@ -254,10 +253,10 @@ logs/:
 
 escript: | all
 	@erl -noshell \
-	     -eval 'io:format("Compiling escript \"./$(APP)\".\n").' \
-	     -eval 'escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $(APP)"}, {archive, [{case F of "ebin/"++E -> E; "$(DEPS_DIR)/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("$(DEPS_DIR)/*/ebin/*")], []}]).' \
-	     -eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
-	     -s init stop
+		-eval 'io:format("Compiling escript \"./$(APP)\".\n").' \
+		-eval 'escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript $(APP)"}, {archive, [{case F of "ebin/"++E -> E; "$(DEPS_DIR)/"++D -> D end, element(2,file:read_file(F))} || F <- filelib:wildcard("ebin/*") ++ filelib:wildcard("$(DEPS_DIR)/*/ebin/*")], []}]).' \
+		-eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
+		-s init stop
 
 ##------------------------------------------------------------------------------
 ## DOCS -- Compiles the app's documentation into doc/
@@ -265,9 +264,9 @@ escript: | all
 docs: $(foreach ext,app.src erl xrl yrl S core, $(wildcard src/*.$(ext))) \
                                                 $(wildcard doc/overview.edoc)
 	@erl -noshell \
-	     -eval 'io:format("Compiling documentation for $(APP).\n").' \
-	     -eval 'edoc:application($(APP), ".", [$(EDOC_OPTS)]).' \
-	     -s init stop
+		-eval 'io:format("Compiling documentation for $(APP).\n").' \
+		-eval 'edoc:application($(APP), ".", [$(EDOC_OPTS)]).' \
+		-s init stop
 .PHONY: docs
 
 ##------------------------------------------------------------------------------
@@ -313,7 +312,7 @@ define build_dep
 	else \
 		if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
 			echo 'make -C $(DEPS_DIR)/$(1)' ; \
-		       	make -C $(DEPS_DIR)/$(1)  ; \
+			make -C $(DEPS_DIR)/$(1)  ; \
 		else \
 			make -C $(DEPS_DIR)/$(1) -f ../../erl.mk ; \
 		fi \
@@ -331,10 +330,10 @@ endef
 define clean_dep
 	@if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
 		echo 'make -C $(DEPS_DIR)/$(1) clean' ; \
-	       	make -C $(DEPS_DIR)/$(1) clean  ; \
+		make -C $(DEPS_DIR)/$(1) clean  ; \
 	else \
 		echo 'cd $(DEPS_DIR)/$(1) && rebar clean && cd ../..' ; \
-	        cd $(DEPS_DIR)/$(1) && rebar clean && cd ../..  ; \
+		cd $(DEPS_DIR)/$(1) && rebar clean && cd ../..  ; \
 	fi
 endef
 
@@ -466,3 +465,7 @@ clean-docs:
 clean-all: clean clean-docs clean-deps clean-rel
 
 .PHONY: clean clean-docs clean-all
+
+### Local Variables:
+### tab-width: 2
+### End:
