@@ -305,13 +305,11 @@ define build_dep
 			fi \
 		fi \
 	fi ; \
-	echo BUILD $(1) - $(ERL_LIBS), $(DEPS_DIR) ; \
+	echo BUILD $(1) ; \
 	if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]]; then \
-		echo 'cd $(DEPS_DIR)/$(1) && $THIS_REBAR get-deps compile && cd ../..' ; \
 		cd $(DEPS_DIR)/$(1) && $$THIS_REBAR deps_dir=$(DEPS_DIR) get-deps compile && cd ../.. ; \
 	else \
 		if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
-			echo 'make -C $(DEPS_DIR)/$(1)' ; \
 			make -C $(DEPS_DIR)/$(1)  ; \
 		else \
 			make -C $(DEPS_DIR)/$(1) -f ../../erl.mk ; \
@@ -328,12 +326,29 @@ define update_dep
 endef
 
 define clean_dep
-	@if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
-		echo 'make -C $(DEPS_DIR)/$(1) clean' ; \
-		make -C $(DEPS_DIR)/$(1) clean  ; \
+	@if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]] ; then \
+		if [[ -f $(DEPS_DIR)/$(1)/rebar ]]; then \
+			export THIS_REBAR="./rebar"; \
+		else \
+			if [[ -f $(GLOBAL_REBAR) ]]; then \
+				export THIS_REBAR=$(GLOBAL_REBAR) ; \
+			else \
+				echo $(1) has rebar.config but no rebar - pulling form github...; \
+				wget -nv -O $(DEPS_DIR)/$(1)/rebar 'https://raw.github.com/id3as/erl-mk/master/rebar'; \
+				chmod 744 $(DEPS_DIR)/$(1)/rebar ; \
+				export THIS_REBAR="./rebar" ; \
+			fi \
+		fi \
+	fi ; \
+	echo CLEAN $(1) ; \
+	if [[ -f $(DEPS_DIR)/$(1)/rebar.config ]]; then \
+		cd $(DEPS_DIR)/$(1) && $$THIS_REBAR deps_dir=$(DEPS_DIR) clean && cd ../.. ; \
 	else \
-		echo 'cd $(DEPS_DIR)/$(1) && rebar clean && cd ../..' ; \
-		cd $(DEPS_DIR)/$(1) && rebar clean && cd ../..  ; \
+		if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
+			make -C $(DEPS_DIR)/$(1) clean ; \
+		else \
+			make -C $(DEPS_DIR)/$(1) -f ../../erl.mk clean; \
+		fi \
 	fi
 endef
 
@@ -362,7 +377,7 @@ update-deps/%/:
 	$(call update_dep,$*,$(word 1,$(dep_$*)),$(word 2,$(dep_$*)))
 
 clean-deps/%/:
-	$(call clean_dep,$*)
+	@$(call clean_dep,$*)
 
 .PHONY: get-deps deps-dir build-deps update-deps clean-deps build-deps/%/ update-deps/%/ clean-deps/%/
 
