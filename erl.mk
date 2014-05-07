@@ -23,7 +23,7 @@ ifeq ($(APP), )
 
 else
 
-.DEFAULT_GOAL := app
+.DEFAULT_GOAL := all
 
 endif
 
@@ -35,7 +35,7 @@ V ?= 0
 verbose_0 = @echo -n;
 verbose = $(verbose_$(V))
 
-all: get-deps app
+all: build-deps app
 
 apps : $(APPS)
 	@echo > /dev/null
