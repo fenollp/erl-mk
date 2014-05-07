@@ -19,7 +19,7 @@ export ERL_LIBS
 
 ifeq ($(APP), )
 
-.DEFAULT_GOAL := all-apps
+.DEFAULT_GOAL := apps-all
 
 else
 
@@ -35,7 +35,10 @@ V ?= 0
 verbose_0 = @echo -n;
 verbose = $(verbose_$(V))
 
-all-apps: build-deps $(APPS)
+apps-all: build-deps apps
+	@echo > /dev/null
+
+apps: $(APPS)
 	@echo > /dev/null
 
 $(APPS): erl.mk
