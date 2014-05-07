@@ -23,7 +23,7 @@ ifeq ($(APP), )
 
 else
 
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := app
 
 endif
 
@@ -35,9 +35,7 @@ V ?= 0
 verbose_0 = @echo -n;
 verbose = $(verbose_$(V))
 
-all: build-deps app
-
-apps : $(APPS)
+apps : build-deps $(APPS)
 	@echo > /dev/null
 
 $(APPS): erl.mk
@@ -90,7 +88,7 @@ DTS = $(patsubst templates/%.dtl, ebin/%_dtl.beam, $(wildcard templates/*.dtl))
 
 DEPENDENCIES = $(patsubst %.beam, %.d, $(ERL_BEAMS))
 
-app: get-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) $(MIBS) | ebin/
+app: build-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) $(MIBS) | ebin/
 	@echo > /dev/null
 
 $(dir $(C_TARGET_NAME)) :
