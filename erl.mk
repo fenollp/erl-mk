@@ -19,11 +19,11 @@ export ERL_LIBS
 
 ifeq ($(APP), )
 
-.DEFAULT_GOAL := apps
+.DEFAULT_GOAL := all-apps
 
 else
 
-.DEFAULT_GOAL := app
+.DEFAULT_GOAL := all
 
 endif
 
@@ -35,7 +35,7 @@ V ?= 0
 verbose_0 = @echo -n;
 verbose = $(verbose_$(V))
 
-apps : build-deps $(APPS)
+all-apps: build-deps $(APPS)
 	@echo > /dev/null
 
 $(APPS): erl.mk
@@ -88,7 +88,10 @@ DTS = $(patsubst templates/%.dtl, ebin/%_dtl.beam, $(wildcard templates/*.dtl))
 
 DEPENDENCIES = $(patsubst %.beam, %.d, $(ERL_BEAMS))
 
-app: build-deps ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) $(MIBS) | ebin/
+all: build-deps app
+	@echo > /dev/null
+
+app: ebin/$(APP).app $(ERL_BEAMS) $(OTHER_BEAMS) $(C_TARGET_NAME) $(DTL) $(MIBS) | ebin/
 	@echo > /dev/null
 
 $(dir $(C_TARGET_NAME)) :
@@ -125,7 +128,7 @@ ebin/%.app: src/%.app.src | ebin/
 	fi
 
 ebin/%.d: $$(wildcard src/%.erl) $$(wildcard src/*/%.erl)   | ebin/
-	$(verbose) erlc -o ebin/ $(ERLCFLAGS) -Iinclude/ -I$(DEPS_DIR)/ -MP -MG -MF $@ $<
+	$(verbose) erlc -o ebin/ $(ERLCFLAGS) -Iinclude/ -I$(DEPS_DIR)/ -MP -MG -MF $@ $< > /dev/null
 	@gawk '/^[ \t]*-(behaviou?r\(|compile\({parse_transform,)/ {match($$0, /-(behaviou?r\([ \t]*([^) \t]+)|compile\({parse_transform,[ \t]*([^} \t]+))/, a); m = (a[2] a[3]); if (m != "" && ((system("ls src/" m ".erl 1>/dev/null 2>/dev/null") == 0) || (system("ls src/*/" m ".erl 1>/dev/null 2>/dev/null") == 0))) print "\nebin/$*.beam: ebin/" m ".beam"}' < $< >> $@
 
 
@@ -308,7 +311,7 @@ define build_dep
 		cd $(DEPS_DIR)/$(1) && $$THIS_REBAR deps_dir=$(DEPS_DIR) get-deps compile && cd ../.. ; \
 	else \
 		if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
-			make -C $(DEPS_DIR)/$(1)  ; \
+			make -C $(DEPS_DIR)/$(1) ; \
 		else \
 			make -C $(DEPS_DIR)/$(1) -f ../../erl.mk ; \
 		fi \
