@@ -32,8 +32,7 @@ app: ebin/$(APP).app \
 
 ebin/%.app: src/%.app.src                       | ebin/
 	@erl -noshell \
-	     -eval 'case file:consult("$<") of {ok,_} -> ok ; \
-	           {error,{_,_,M}} -> io:format("$<: ~s~s\n",M), halt(1) end.' \
+	     -eval 'case file:consult("$<") of {ok,_} -> ok ; {error,{_,_,M}} -> io:format("$<: ~s~s\n",M), halt(1) end.' \
 	     -s init stop
 	cp $< $@
 
