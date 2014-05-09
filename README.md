@@ -5,7 +5,7 @@ Include this in your Makefile:
 all: erl.mk
 
 erl.mk:
-	curl -sSo erl.mk 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm erl.mk
+	curl -fsSLo erl.mk 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm erl.mk
 
 include erl.mk
 
