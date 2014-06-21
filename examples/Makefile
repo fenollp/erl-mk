@@ -3,7 +3,7 @@ all: erl.mk
 erl.mk:
 	curl -fsSLo $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@
 
-dep_bullet = https://github.com/extend/bullet.git 0.4.1
+dep_sheriff = https://github.com/extend/sheriff.git 0.4.1
 
 include erl.mk
 
@@ -15,6 +15,7 @@ distclean: clean clean-docs
 	$(if $(wildcard erl.mk), rm erl.mk   )
 .PHONY: distclean
 
+debug: ERLCFLAGS += +export_all +debug_info
 debug: all
 	erl -pa ebin/ -pa deps/*/ebin/ -eval 'c:l($(APP)).'
 
