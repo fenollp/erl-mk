@@ -281,6 +281,7 @@ DEPS_DIR ?= $(CURDIR)/deps
 export DEPS_DIR
 
 FULL_DEPS = $(addsuffix /, $(addprefix $(DEPS_DIR)/, $(DEPS)))
+FULL_DEPS_TARGET = $(addprefix $(DEPS_DIR)/, $(DEPS))
 
 GLOBAL_REBAR = $(shell which rebar || echo "./rebar")
 
@@ -367,11 +368,11 @@ clean-deps: get-deps $(patsubst %,clean-deps/%/,$(DEPS))
 deps-dir:
 	$(if $(wildcard $(DEPS_DIR)),,mkdir -p $(DEPS_DIR))
 
-$(FULL_DEPS):
+$(FULL_DEPS_TARGET):
 	$(call get_dep,$(@F),$(word 1,$(dep_$(@F))),$(word 2,$(dep_$(@F))))
 	$(call build_dep,$(@F))
 
-deps/%/ : | $(DEPS_DIR)/%/
+deps/%/ : | $(DEPS_DIR)/%
 	@#
 
 build-deps/%/:
