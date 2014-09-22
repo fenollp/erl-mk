@@ -36,22 +36,26 @@ ebin/%.app: src/%.app.src                       | ebin/
 	     -s init stop
 	cp $< $@
 
-ebin/%.beam: src/%.erl $(wildcard include/*)    | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+ebin/%.beam: first_flags = -o ebin/ $(patsubst %,-pa %,$(wildcard deps/*/ebin))
+ebin/%.beam: include_files = $(wildcard include/*)
+ebin/%.beam: include_dirs = $(addprefix -I ,include/ deps/)
+
+ebin/%.beam: src/%.erl $(include_files)         | ebin/
+	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) $<
 
 ebin/%.beam: src/%.xrl $(wildcard include/*)    | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) $<
-	erlc -o ebin/ ebin/$*.erl
+	erlc    $(first_flags) $(ERLCFLAGS) $<
+	erlc    $(first_flags) $(ERLCFLAGS) $(include_dirs) ebin/$*.erl
 
-ebin/%.beam: src/%.yrl $(wildcard include/*)    | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) $<
-	erlc -o ebin/ ebin/$*.erl
+ebin/%.beam: src/%.yrl $(include_files)         | ebin/
+	erlc    $(first_flags) $(ERLCFLAGS) $<
+	erlc    $(first_flags) $(ERLCFLAGS) $(include_dirs) ebin/$*.erl
 
-ebin/%.beam: src/%.S $(wildcard include/*)      | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v +from_asm -Iinclude/ -Ideps/ $<
+ebin/%.beam: src/%.S $(include_files)           | ebin/
+	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) +from_asm $<
 
-ebin/%.beam: src/%.core $(wildcard include/*)   | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v +from_core -Iinclude/ -Ideps/ $<
+ebin/%.beam: src/%.core $(include_files)        | ebin/
+	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) +from_core $<
 
 ebin/%_dtl.beam: templates/%.dtl                | ebin/
 	$(if $(wildcard deps/erlydtl/),, \
@@ -62,7 +66,7 @@ ebin/%_dtl.beam: templates/%.dtl                | ebin/
 	     -s init stop
 
 ebin/:
-	mkdir ebin/
+	mkdir $@
 
 ### EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files).
 
@@ -100,7 +104,7 @@ ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/
 .PRECIOUS: ebin/%_SUITE.beam
 
 logs/:
-	mkdir logs/
+	mkdir $@
 
 ### ESCRIPT -- Create a stand-alone EScript executable.
 
