@@ -7,18 +7,18 @@ APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 
 deps : $(patsubst dep_%,deps/%/,$(filter dep_%,$(.VARIABLES)))    | deps-dir
 	$(if $(wildcard deps/*/deps/), \
-	    mv -v deps/*/deps/* deps/ 2>/dev/null ; rmdir $(wildcard deps/*/deps/))
+	    mv -v deps/*/deps/* deps/ 2>/dev/null ; rmdir deps/*/deps/)
 .PHONY: deps
 
-deps-dir:
+deps-dir: # Can't name it deps/ because of deps/%/
 	$(if $(wildcard deps/),,mkdir deps/)
 
 deps/%/:
 	git clone -n -- $(word 1,$(dep_$*)) $@
 	cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../..
 	@bash -c "if [[ -f $@/Makefile ]]; \
-	then echo 'make -C $@ all' ; \
-	           make -C $@ all  ; \
+	then echo '$(MAKE) -C $@ all' ; \
+	           $(MAKE) -C $@ all  ; \
 	else echo 'cd $@ && rebar get-deps compile && cd ../..' ; \
 	           cd $@ && rebar get-deps compile && cd ../..  ; fi"
 
@@ -30,37 +30,37 @@ app: ebin/$(APP).app \
      $(patsubst templates/%.dtl,  ebin/%_dtl.beam,$(wildcard templates/*.dtl))
 .PHONY: app
 
-ebin/%.app: src/%.app.src                       | ebin/
+ebin/%.app: src/%.app.src               | ebin/
 	@erl -noshell \
 	     -eval 'case file:consult("$<") of {ok,_} -> ok ; {error,{_,_,M}} -> io:format("$<: ~s~s\n",M), halt(1) end.' \
 	     -s init stop
 	cp $< $@
 
-ebin/%.beam: first_flags = -o ebin/ $(patsubst %,-pa %,$(wildcard deps/*/ebin))
-ebin/%.beam: include_files = $(wildcard include/*)
-ebin/%.beam: include_dirs = $(addprefix -I ,include/ deps/)
+ebin/%.beam: first_flags = -o ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/))
+ebin/%.beam: include_files = $(wildcard include/*.hrl)
+ebin/%.beam: include_dirs = -I include/ -I deps/
 
-ebin/%.beam: src/%.erl $(include_files)         | ebin/
+ebin/%.beam: $(include_files) src/%.erl | ebin/
 	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) $<
 
-ebin/%.beam: src/%.xrl $(wildcard include/*)    | ebin/
+ebin/%.beam: $(include_files) src/%.xrl | ebin/
 	erlc    $(first_flags) $(ERLCFLAGS) $<
 	erlc    $(first_flags) $(ERLCFLAGS) $(include_dirs) ebin/$*.erl
 
-ebin/%.beam: src/%.yrl $(include_files)         | ebin/
+ebin/%.beam: $(include_files) src/%.yrl | ebin/
 	erlc    $(first_flags) $(ERLCFLAGS) $<
 	erlc    $(first_flags) $(ERLCFLAGS) $(include_dirs) ebin/$*.erl
 
-ebin/%.beam: src/%.S $(include_files)           | ebin/
+ebin/%.beam: $(include_files) src/%.S   | ebin/
 	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) +from_asm $<
 
-ebin/%.beam: src/%.core $(include_files)        | ebin/
+ebin/%.beam: $(include_files) src/%.core| ebin/
 	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) +from_core $<
 
-ebin/%_dtl.beam: templates/%.dtl                | ebin/
+ebin/%_dtl.beam: templates/%.dtl        | ebin/
 	$(if $(wildcard deps/erlydtl/),, \
 	    $(error Error compiling $<: deps/erlydtl/ not found))
-	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
+	@erl -noshell -pz ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/)) \
 	     -eval 'io:format("Compiling ErlyDTL template: $< -> $@\n").' \
 	     -eval 'erlydtl:compile("$<", $*_dtl, [{out_dir,"ebin/"},{auto_escape,false}]).' \
 	     -s init stop
@@ -68,47 +68,55 @@ ebin/%_dtl.beam: templates/%.dtl                | ebin/
 ebin/:
 	mkdir $@
 
-### EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files).
+### EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files)
 
 eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
 .PHONY: eunit
 
-#eunit.%: ebin/%_tests.beam
-eunit.%:                                | all
-	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ test/$*_tests.erl
-	@erl -noshell -pa ebin/ -pa deps/*/ebin/ \
+eunit.%: first_flags = -o ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/))
+eunit.%: include_files = $(wildcard include/*.hrl)
+eunit.%: include_dirs = -I include/ -I deps/
+
+#eunit.%: ebin/%_tests.beam #FIXME
+eunit.%: $(include_files)               | all
+	erlc -v $(first_flags) -DTEST=1 -DEUNIT $(ERLCFLAGS) $(include_dirs) test/$*_tests.erl
+	@erl -noshell -pz ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/)) \
 	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
 	     -s init stop
 .PHONY: eunit.%
 
-#ebin/%_tests.beam: test/%_tests.erl     | all #TODO fix something so that this can be used instead of the erlc line above
-#	erlc -o ebin/ -DTEST=1 -DEUNIT $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+#ebin/%_tests.beam: test/%_tests.erl     | all #FIXME so that this can be used instead of the erlc line above
+#	erlc -v $(first_flags) -DTEST=1 -DEUNIT $(ERLCFLAGS) $(include_dirs) $<
 #.PRECIOUS: ebin/%_tests.beam
 
-### CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl).
+### CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl)
 
 ct: $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.erl))
 .PHONY: ct
 
+ct.%: first_flags = -o ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/))
+ct.%: include_files = $(wildcard include/*.hrl)
+ct.%: include_dirs = -I include/ -I deps/
+
 ct.%: ebin/%_SUITE.beam                 | logs/
-#	Todo: use -no_auto_compile and ebin/%_SUITE.beam properly.
+#	FIXME use -no_auto_compile and ebin/%_SUITE.beam properly.
 	@ct_run -noshell -dir test/ -logdir logs/ \
-	        -pa ebin/ -pa $(wildcard $(shell pwd)/deps/*/ebin/) \
+	        -pz ebin/ $(patsubst %,-pz %,$(realpath $(wildcard deps/*/ebin/))) \
 	        -suite $*_SUITE || true
 .PHONY: ct.%
 
-#todo: make ct depend on target all, and in a parallel-safe way.
-#ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/ all <-- this blocks if no ebin/
-ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/
-	erlc -o ebin/ $(ERLCFLAGS) -v -Iinclude/ -Ideps/ $<
+#FIXME make ct depend on target all, and in a parallel-safe way.
+#ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/ all <-- this blocks if no ebin/ (try swapping them?)
+ebin/%_SUITE.beam: $(include_files) test/%_SUITE.erl    | ebin/
+	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) $<
 .PRECIOUS: ebin/%_SUITE.beam
 
 logs/:
 	mkdir $@
 
-### ESCRIPT -- Create a stand-alone EScript executable.
+### ESCRIPT -- Create a stand-alone EScript executable
 
-escript: | all
+escript:                                | all
 	@erl -noshell \
 	     -eval 'io:format("Compiling escript \"./$(APP)\".\n").' \
 	     -eval 'G = fun (_, [], Acc) -> Acc; (F, [Path|Rest], Acc) -> case filelib:is_dir(Path) of false -> F(F, Rest, [Path|Acc]); true -> {ok, Listing} = file:list_dir(Path), Paths = [filename:join(Path, Name) || Name <- Listing, Name /= ".git"], F(F, Paths ++ Rest, Acc) end end, escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript main $(APP)"}, {archive, [{case File of "./deps/"++File1 -> File1; _ -> "$(APP)/" ++ File -- "./" end,element(2,file:read_file(File))} || File <- G(G, ["."], [])], []}]).' \
@@ -125,7 +133,7 @@ docs: $(foreach ext,app.src erl xrl yrl S core, $(wildcard src/*.$(ext))) \
 	     -s init stop
 .PHONY: docs
 
-### CLEAN-DOCS -- Removes generated doc/ stuff.
+### CLEAN-DOCS -- Removes generated stuff from doc/
 
 clean-docs:
 	$(if $(wildcard doc/*.css),     rm doc/*.css)
@@ -135,7 +143,7 @@ clean-docs:
 	@bash -c '[[ -d doc/ ]] && [[ ''doc/*'' = "`echo doc/*`" ]] && rmdir doc/ || true'
 .PHONY: clean-docs
 
-### CLEAN -- Removes ebin/
+### CLEAN -- Removes ebin/ if it exists
 
 clean:
 	$(if $(wildcard ebin/),rm -r ebin/)
