@@ -81,7 +81,6 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 
 ## To Do
 * Support the whole OTP arch (eg. `lib/`, `c_src/`, …)
-* Fix `make -j` support
 * Proper compilation of `ct` target's files (ie. `-no_auto_compile` issue)
 * Optional `dep_*` notation retrieving snapshots instead of whole git repos
     * See `git-archive --format tar --remote ‹URI› ‹commit› > some.tar` and GitHub's support

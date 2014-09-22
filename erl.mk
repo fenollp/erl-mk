@@ -1,17 +1,15 @@
-all: deps app
+all: deps
+	@$(MAKE) app
 .PHONY: all
 
 APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 
 ### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
 
-deps : $(patsubst dep_%,deps/%/,$(filter dep_%,$(.VARIABLES)))    | deps-dir
+deps: $(patsubst dep_%,deps/%/,$(filter dep_%,$(.VARIABLES)))
 	$(if $(wildcard deps/*/deps/), \
 	    mv -v deps/*/deps/* deps/ 2>/dev/null ; rmdir deps/*/deps/)
 .PHONY: deps
-
-deps-dir: # Can't name it deps/ because of deps/%/
-	$(if $(wildcard deps/),,mkdir deps/)
 
 deps/%/:
 	git clone -n -- $(word 1,$(dep_$*)) $@
