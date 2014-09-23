@@ -1,19 +1,19 @@
-all: deps
-	@$(MAKE) app
-.PHONY: all
-
 APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
+
+.PHONY: $(APP)
+$(APP): deps
+	@$(MAKE) app
 
 ### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
 
+.PHONY: deps
 deps: $(patsubst dep_%,deps/%/,$(filter dep_%,$(.VARIABLES)))
 	$(if $(wildcard deps/*/deps/), \
 	    mv -v deps/*/deps/* deps/ 2>/dev/null ; rmdir deps/*/deps/)
-.PHONY: deps
 
 deps/%/:
-	git clone -n -- $(word 1,$(dep_$*)) $@
-	cd $@ && git checkout -q $(word 2,$(dep_$*)) && cd ../..
+	git clone --no-checkout -- $(word 1,$(dep_$*)) $@
+	cd $@ && git checkout --quiet $(word 2,$(dep_$*)) && cd ../..
 	@bash -c "if [[ -f $@/Makefile ]]; \
 	then echo '$(MAKE) -C $@ all' ; \
 	           $(MAKE) -C $@ all  ; \
@@ -22,11 +22,11 @@ deps/%/:
 
 ### APP -- Compiles src/ into ebin/
 
+.PHONY: app
 app: ebin/$(APP).app \
      $(foreach ext, erl xrl yrl S core, \
          $(patsubst src/%.$(ext), ebin/%.beam, $(wildcard src/*.$(ext)))) \
      $(patsubst templates/%.dtl,  ebin/%_dtl.beam,$(wildcard templates/*.dtl))
-.PHONY: app
 
 ebin/%.app: src/%.app.src               | ebin/
 	@erl -noshell \
@@ -68,8 +68,8 @@ ebin/:
 
 ### EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files)
 
-eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
 .PHONY: eunit
+eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
 
 eunit.%: first_flags = -o ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/))
 eunit.%: include_files = $(wildcard include/*.hrl)
@@ -89,8 +89,8 @@ eunit.%: $(include_files)               | all
 
 ### CT -- Compiles (into ebin/) & run Common Test tests (test/*_SUITE.erl)
 
-ct: $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.erl))
 .PHONY: ct
+ct: $(patsubst test/%_SUITE.erl, ct.%, $(wildcard test/*_SUITE.erl))
 
 ct.%: first_flags = -o ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/))
 ct.%: include_files = $(wildcard include/*.hrl)
@@ -114,35 +114,42 @@ logs/:
 
 ### ESCRIPT -- Create a stand-alone EScript executable
 
-escript:                                | all
+#.PHONY: escript FIXME maybe?
+escript: $(APP) clean-escript #FIXME when in deps? FIXME clean-escript?
 	@erl -noshell \
 	     -eval 'io:format("Compiling escript \"./$(APP)\".\n").' \
 	     -eval 'G = fun (_, [], Acc) -> Acc; (F, [Path|Rest], Acc) -> case filelib:is_dir(Path) of false -> F(F, Rest, [Path|Acc]); true -> {ok, Listing} = file:list_dir(Path), Paths = [filename:join(Path, Name) || Name <- Listing, Name /= ".git"], F(F, Paths ++ Rest, Acc) end end, escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript main $(APP)"}, {archive, [{case File of "./deps/"++File1 -> File1; _ -> "$(APP)/" ++ File -- "./" end,element(2,file:read_file(File))} || File <- G(G, ["."], [])], []}]).' \
 	     -eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
 	     -s init stop
 
+### CLEAN-ESCRIPT -- Removes ./$(APP) if it exists
+
+.PHONY: clean-escript
+clean-escript:
+	$(if $(wildcard $(APP)), rm $(APP))
+
 ### DOCS -- Compiles the app's documentation into doc/
 
+.PHONY: docs #FIXME depend on target app
 docs: $(foreach ext,app.src erl xrl yrl S core, $(wildcard src/*.$(ext))) \
                                                 $(wildcard doc/overview.edoc)
 	@erl -noshell \
 	     -eval 'io:format("Compiling documentation for $(APP).\n").' \
 	     -eval 'edoc:application($(APP), ".", [$(EDOC_OPTS)]).' \
 	     -s init stop
-.PHONY: docs
 
 ### CLEAN-DOCS -- Removes generated stuff from doc/
 
+.PHONY: clean-docs
 clean-docs:
 	$(if $(wildcard doc/*.css),     rm doc/*.css)
 	$(if $(wildcard doc/*.html),    rm doc/*.html)
 	$(if $(wildcard doc/*.png),     rm doc/*.png)
 	$(if $(wildcard doc/edoc-info), rm doc/edoc-info)
-	@bash -c '[[ -d doc/ ]] && [[ ''doc/*'' = "`echo doc/*`" ]] && rmdir doc/ || true'
-.PHONY: clean-docs
+	@bash -c '[[ -d doc/ ]] && [[ ''doc/*'' = "`echo doc/*`" ]] && rmdir doc/ || true' #FIXME use wildcard, notdir, … instead of shell
 
 ### CLEAN -- Removes ebin/ if it exists
 
+.PHONY: clean
 clean:
 	$(if $(wildcard ebin/),rm -r ebin/)
-.PHONY: clean

@@ -26,7 +26,7 @@ Now, `make -j`. This is exquivalent to `rebar -j get-deps compile`.
 * **erl.mk** requires `make` (not particularly GNU's), `erlang`, `bash` and tools like `cp` & `mv`
 * If your dependencies (and theirs & so on) don't have a Makefile, **erl.mk** requires `rebar`
 * Same dependency management as `rebar`'s:
-    * `mv -v deps/*/deps/* deps/ 2>/dev/null ; rmdir deps/*/deps/`
+    * `mv deps/*/deps/* deps/ ; rmdir deps/*/deps/`
 * **erl.mk** automatically sets & exports **$(APP)**: a variable that contains the current project's name
 
 ## Usage
@@ -57,19 +57,20 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `test/*_SUITE.erl` | Common Test tests    |
 
 ### API
-| `make` target     | Action                                                      |
-| ----------------- | ----------------------------------------------------------- |
-| `make all`        | ⇔ `make deps app`                                           |
-| `make deps`       | Fetch & compile dependencies and deps of deps, into `deps/` |
-| `make app`        | Compile files from `src/` | `templates/`                    |
-| `make eunit`      | Compile & EUnit-test files in `test/*_tests.erl`            |
-| `make eunit.Mod`  | Compile & EUnit-test code in `test/Mod_tests.erl`           |
-| `make ct`         | Compile & CommonTest-test files in `test/*_SUITE.erl`       |
-| `make ct.Mod`     | Compile & CommonTest-test code in `test/Mod_SUITE.erl`      |
-| `make escript`    | Generate a stand-alone `escript` executable                 |
-| `make docs`       | Generate the app's documentation into `doc/`                |
-| `make clean-docs` | Remove `doc/{edoc-info,*.{css,html,png}}`                   |
-| `make clean`      | Remove `ebin/`                                              |
+| `make` target        | Action                                                      |
+| -----------------    | ----------------------------------------------------------- |
+| `make $(APP)`        | ⇔ `make deps` then `make app`                               |
+| `make deps`          | Fetch & compile dependencies and deps of deps, into `deps/` |
+| `make app`           | Compile files from `src/` | `templates/`                    |
+| `make eunit`         | Compile & EUnit-test files in `test/*_tests.erl`            |
+| `make eunit.Mod`     | Compile & EUnit-test code in `test/Mod_tests.erl`           |
+| `make ct`            | Compile & CommonTest-test files in `test/*_SUITE.erl`       |
+| `make ct.Mod`        | Compile & CommonTest-test code in `test/Mod_SUITE.erl`      |
+| `make escript`       | Generate a stand-alone `escript` executable                 |
+| `make clean-escript` | Remove `./$(APP)` executable                                |
+| `make docs`          | Generate the app's documentation into `doc/`                |
+| `make clean-docs`    | Remove `doc/{edoc-info,*.{css,html,png}}`                   |
+| `make clean`         | Remove `ebin/`                                              |
 
 ## Differences with erlang.mk
 * Compatible with dependencies that use a Makefile or `rebar`
@@ -80,7 +81,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 * Uses relative paths, thus no trouble with superior folders' name containing whitespaces
 
 ## To Do
-* Support the whole OTP arch (eg. `lib/`, `c_src/`, …)
+* Support the whole OTP arch (eg. `lib/`, `c_src/`, subdirectories, …)
 * Proper compilation of `ct` target's files (ie. `-no_auto_compile` issue)
 * Optional `dep_*` notation retrieving snapshots instead of whole git repos
     * See `git-archive --format tar --remote ‹URI› ‹commit› > some.tar` and GitHub's support
