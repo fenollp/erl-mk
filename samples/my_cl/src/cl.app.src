@@ -1,0 +1,7 @@
+{application, cl, [ {description, "OpenCL binding for Erlang"}
+                  , {vsn, git}
+                  , {modules, [cl,cl10,cl11,cl12,clu]}
+                  , {env, []}
+                  , {applications, [ kernel
+                                   , stdlib ]}
+                  ]}.
