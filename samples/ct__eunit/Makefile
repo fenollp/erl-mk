@@ -1,12 +1,13 @@
 all: erl.mk
-
-distclean: clean clean-docs
-	$(if $(wildcard deps/ ), rm -rf deps/)
-	$(if $(wildcard logs/ ), rm -rf logs/)
-#	$(if $(wildcard erl.mk), rm erl.mk   )
-.PHONY: distclean
+	$(MAKE) $(APP)
 
 include erl.mk
-
 # Your targets after this line.
 
+clean: clean-ebin
+distclean: clean clean-deps
+	$(if $(wildcard logs/), rm -r logs/)
+
+.PHONY: distclean clean test
+
+test: ct eunit

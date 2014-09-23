@@ -13,8 +13,6 @@ include erl.mk
 # Your targets after this line.
 
 distclean: clean clean-docs clean-deps
-	$(if $(wildcard erl.mk), rm erl.mk)
-.PHONY: distclean
 
 clean: clean-ebin
 
