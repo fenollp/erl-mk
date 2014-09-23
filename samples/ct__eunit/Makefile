@@ -1,7 +1,7 @@
 all: erl.mk
 	$(MAKE) $(APP)
 
-include erl.mk
+-include erl.mk
 # Your targets after this line.
 
 clean: clean-ebin

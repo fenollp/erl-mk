@@ -9,7 +9,7 @@ dep_erlydtl = git://github.com/erlydtl/erlydtl.git master
 
 ERLCFLAGS += +debug_info
 
-include erl.mk
+-include erl.mk
 
 # Your targets after this line.
 

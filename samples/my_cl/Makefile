@@ -3,7 +3,7 @@ all: erl.mk
 erl.mk:
 	wget -nv -O $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@
 
-include erl.mk
+-include erl.mk
 # Your targets after this line.
 
 distclean: clean clean-deps clean-docs

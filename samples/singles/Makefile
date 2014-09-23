@@ -8,7 +8,7 @@ dep_ring  = git@bitbucket.org:fenollp/ring.git master
 dep_ringo = git@bitbucket.org:fenollp/ring.git master
 dep_starr = git@bitbucket.org:fenollp/ring.git master
 
-include erl.mk
+-include erl.mk
 
 # Your targets after this line.
 

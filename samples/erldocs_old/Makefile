@@ -6,7 +6,7 @@ erl.mk:
 
 dep_erlydtl = git://github.com/erlydtl/erlydtl.git master erlydtl erlydtl
 
-include erl.mk
+-include erl.mk
 # Your targets after this line.
 
 distclean: clean clean-docs clean-deps clean-escript

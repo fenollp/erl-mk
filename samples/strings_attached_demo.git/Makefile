@@ -3,7 +3,7 @@ all:
 
 dep_strings_attached = https://github.com/fenollp/strings_attached.git
 
-include erl.mk
+-include erl.mk
 
 # Your targets after this line.
 

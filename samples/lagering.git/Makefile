@@ -6,7 +6,7 @@ erl.mk:
 
 dep_lager = https://github.com/basho/lager.git 2.0.3
 
-include erl.mk
+-include erl.mk
 # Your targets after this line.
 
 .PHONY: clean distclean debug

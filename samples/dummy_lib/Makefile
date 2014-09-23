@@ -6,7 +6,7 @@ erl.mk:
 
 dep_sheriff = https://github.com/extend/sheriff.git 0.4.1
 
-include erl.mk
+iinclude erl.mk
 # Your targets after this line.
 
 clean: clean-ebin
