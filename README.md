@@ -95,6 +95,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 * Require `sh` instead of `bash`
 * Option to compile `deps/` using `make -f erl.mk …` instead of default `rebar`
     * How about `depsWith=erl.mk make deps`?
+* Use make's `$(info …)` in place of `io:format/1` calls
 
 
 ## ¬ To Do
