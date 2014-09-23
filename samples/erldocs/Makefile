@@ -1,6 +1,5 @@
 #all: $(APP) escript # For non-parallel usage
 all: erl.mk
-	$(MAKE) $(APP)
 	$(MAKE) escript
 
 erl.mk:
@@ -14,6 +13,8 @@ include erl.mk
 
 # Your targets after this line.
 
-distclean: clean-ebin clean-docs clean-escript clean-deps
+clean: clean-ebin
+
+distclean: clean clean-escript clean-deps
 	$(if $(wildcard docs/), rm -rf docs/ )
 .PHONY: distclean
