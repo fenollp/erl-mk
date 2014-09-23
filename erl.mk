@@ -4,6 +4,13 @@ APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 $(APP): deps
 	@$(MAKE) app
 
+### DEBUG-APP -- Load compiled code into a new REPL
+
+.PHONY: debug-app
+debug-app: ERLCFLAGS += +debug_info +export_all
+debug-app: $(APP)
+	erl -pz ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/)) -eval 'c:l($(APP)).'
+
 ### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
 
 .PHONY: deps

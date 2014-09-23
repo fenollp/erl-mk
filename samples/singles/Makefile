@@ -17,3 +17,5 @@ clean: clean-ebin
 
 more: $(APP)
 	echo .$(include_dirs).
+
+debug: debug-app

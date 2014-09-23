@@ -60,7 +60,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make` target        | Action                                                      |
 | -------------------- | ----------------------------------------------------------- |
 | `make $(APP)`        | ⇔ `make deps` then `make app`                               |
-| `make deps`          | Fetch & compile dependencies and deps of deps, into `deps/` |
+| `make debug-app`     | ⇔ `make $(APP)` then starts a readied REPL                  |
 | `make app`           | Compile files from `src/` | `templates/`                    |
 | `make eunit`         | Compile & EUnit-test files in `test/*_tests.erl`            |
 | `make eunit.Mod`     | Compile & EUnit-test code in `test/Mod_tests.erl`           |
