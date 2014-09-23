@@ -1,0 +1,12 @@
+{application, strings_attached_demo,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { strings_attached_demo_app, []}},
+  {env, []}
+ ]}.

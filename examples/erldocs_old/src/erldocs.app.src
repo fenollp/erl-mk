@@ -1,0 +1,14 @@
+{ application
+, erldocs
+, [ {description, "Alternative Erlang documentation builder."}
+  , {vsn, "1"}
+  , {modules, [ erldocs
+              , erldocs_core
+              ]}
+  , {registered, []}
+  , {applications, [ kernel
+                   , stdlib
+                   ]}
+  , {env, []}
+  ]
+}.

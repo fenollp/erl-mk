@@ -1,0 +1,30 @@
+module 'yoloapp_sup' ['init'/1,
+		      'module_info'/0,
+		      'module_info'/1,
+		      'start_link'/0]
+    attributes ['behaviour' =
+		    ['supervisor']]
+'start_link'/0 =
+    fun () ->
+	call 'supervisor':'start_link'
+	    ({'local','yoloapp_sup'}, 'yoloapp_sup', [])
+'init'/1 =
+    fun (_X_cor0) ->
+	case _X_cor0 of
+	  <[]> when 'true' ->
+	      {'ok',{{'one_for_one',5,10},[]}}
+	  ( <_X_cor1> when 'true' ->
+		( primop 'match_fail'
+		      ({'function_clause',_X_cor1})
+		  -| [{'function_name',{'init',1}}] )
+	    -| ['compiler_generated'] )
+	end
+'module_info'/0 =
+    fun () ->
+	call 'erlang':'get_module_info'
+	    ('yoloapp_sup')
+'module_info'/1 =
+    fun (_X_cor0) ->
+	call 'erlang':'get_module_info'
+	    ('yoloapp_sup', _X_cor0)
+end

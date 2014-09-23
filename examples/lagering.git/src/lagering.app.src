@@ -1,0 +1,14 @@
+{application, lagering,
+ [
+  {description, "An Erlang lagering library"},
+  {vsn, "1"},
+  {modules, [
+             lagering
+            ]},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
