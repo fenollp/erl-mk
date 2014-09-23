@@ -122,12 +122,6 @@ escript: $(APP) clean-escript #FIXME when in deps? FIXME clean-escript?
 	     -eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
 	     -s init stop
 
-### CLEAN-ESCRIPT -- Removes ./$(APP) if it exists
-
-.PHONY: clean-escript
-clean-escript:
-	$(if $(wildcard $(APP)), rm $(APP))
-
 ### DOCS -- Compiles the app's documentation into doc/
 
 .PHONY: docs #FIXME depend on target app
@@ -148,8 +142,20 @@ clean-docs:
 	$(if $(wildcard doc/edoc-info), rm doc/edoc-info)
 	@bash -c '[[ -d doc/ ]] && [[ ''doc/*'' = "`echo doc/*`" ]] && rmdir doc/ || true' #FIXME use wildcard, notdir, … instead of shell
 
-### CLEAN -- Removes ebin/ if it exists
+### CLEAN-ESCRIPT -- Removes ./$(APP) if it exists
 
-.PHONY: clean
-clean:
+.PHONY: clean-escript
+clean-escript:
+	$(if $(wildcard $(APP)), rm $(APP))
+
+### CLEAN-EBIN -- Removes ebin/ if it exists
+
+.PHONY: clean-ebin
+clean-ebin:
 	$(if $(wildcard ebin/),rm -r ebin/)
+
+### CLEAN-DEPS -- Removes deps/ if it exists
+
+.PHONY: clean-deps
+clean-deps:
+	$(if $(wildcard deps/),rm -rf deps/)

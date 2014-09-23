@@ -58,7 +58,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 
 ### API
 | `make` target        | Action                                                      |
-| -----------------    | ----------------------------------------------------------- |
+| -------------------- | ----------------------------------------------------------- |
 | `make $(APP)`        | ⇔ `make deps` then `make app`                               |
 | `make deps`          | Fetch & compile dependencies and deps of deps, into `deps/` |
 | `make app`           | Compile files from `src/` | `templates/`                    |
@@ -67,10 +67,11 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make ct`            | Compile & CommonTest-test files in `test/*_SUITE.erl`       |
 | `make ct.Mod`        | Compile & CommonTest-test code in `test/Mod_SUITE.erl`      |
 | `make escript`       | Generate a stand-alone `escript` executable                 |
-| `make clean-escript` | Remove `./$(APP)` executable                                |
 | `make docs`          | Generate the app's documentation into `doc/`                |
 | `make clean-docs`    | Remove `doc/{edoc-info,*.{css,html,png}}`                   |
-| `make clean`         | Remove `ebin/`                                              |
+| `make clean-escript` | Remove `./$(APP)` executable                                |
+| `make clean-ebin`    | Remove `ebin/`                                              |
+| `make clean-deps`    | Remove `deps/`                                              |
 
 ## Differences with erlang.mk
 * Compatible with dependencies that use a Makefile or `rebar`
