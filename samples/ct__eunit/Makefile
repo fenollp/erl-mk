@@ -1,5 +1,4 @@
-all: erl.mk
-	$(MAKE) $(APP)
+all: app | erl.mk
 
 -include erl.mk
 # Your targets after this line.

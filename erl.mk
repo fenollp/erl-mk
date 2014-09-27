@@ -1,14 +1,10 @@
 APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 
-.PHONY: $(APP)
-$(APP): deps
-	@$(MAKE) app
-
 ### DEBUG-APP -- Load compiled code into a new REPL
 
 .PHONY: debug-app
 debug-app: ERLCFLAGS += +debug_info +export_all
-debug-app: $(APP)
+debug-app: app
 	erl -pz ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/)) -eval 'c:l($(APP)).'
 
 ### DEPS -- Fetches & compiles deps recursively then moves every dep to deps/
@@ -22,8 +18,8 @@ deps/%/:
 	git clone --no-checkout -- $(word 1,$(dep_$*)) $@
 	cd $@ && git checkout --quiet $(word 2,$(dep_$*)) && cd ../..
 	@bash -c "if [[ -f $@/Makefile ]]; \
-	then echo '$(MAKE) -C $@ all' ; \
-	           $(MAKE) -C $@ all  ; \
+	then echo '$(MAKE) -C $@' ; \
+	           $(MAKE) -C $@  ; \
 	else echo 'cd $@ && rebar get-deps compile && cd ../..' ; \
 	           cd $@ && rebar get-deps compile && cd ../..  ; fi"
 
@@ -70,8 +66,8 @@ ebin/%_dtl.beam: templates/%.dtl        | ebin/
 	     -eval 'erlydtl:compile("$<", $*_dtl, [{out_dir,"ebin/"},{auto_escape,false}]).' \
 	     -s init stop
 
-ebin/:
-	mkdir $@
+ebin/: deps
+	$(if $(wildcard $@),,mkdir $@)
 
 ### EUNIT -- Compiles (into ebin/) & run EUnit tests (test/*_test.erl files)
 
@@ -83,14 +79,14 @@ eunit.%: include_files = $(wildcard include/*.hrl)
 eunit.%: include_dirs = -I include/ -I deps/
 
 #eunit.%: ebin/%_tests.beam #FIXME
-eunit.%: $(include_files)               | all
+eunit.%: $(include_files)               | app
 	erlc -v $(first_flags) -DTEST=1 -DEUNIT $(ERLCFLAGS) $(include_dirs) test/$*_tests.erl
 	@erl -noshell -pz ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/)) \
 	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
 	     -s init stop
 .PHONY: eunit.%
 
-#ebin/%_tests.beam: test/%_tests.erl     | all #FIXME so that this can be used instead of the erlc line above
+#ebin/%_tests.beam: test/%_tests.erl     | app #FIXME so that this can be used instead of the erlc line above
 #	erlc -v $(first_flags) -DTEST=1 -DEUNIT $(ERLCFLAGS) $(include_dirs) $<
 #.PRECIOUS: ebin/%_tests.beam
 
@@ -110,8 +106,8 @@ ct.%: ebin/%_SUITE.beam                 | logs/
 	        -suite $*_SUITE || true
 .PHONY: ct.%
 
-#FIXME make ct depend on target all, and in a parallel-safe way.
-#ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/ all <-- this blocks if no ebin/ (try swapping them?)
+#FIXME make ct depend on target app, and in a parallel-safe way.
+#ebin/%_SUITE.beam: test/%_SUITE.erl     | ebin/ app <-- this blocks if no ebin/ (try swapping them?)
 ebin/%_SUITE.beam: $(include_files) test/%_SUITE.erl    | ebin/
 	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) $<
 .PRECIOUS: ebin/%_SUITE.beam
@@ -121,13 +117,12 @@ logs/:
 
 ### ESCRIPT -- Create a stand-alone EScript executable
 
-#FIXME: PHONYness
-escript: $(APP) clean-escript #FIXME when in deps?
+escript: app clean-escript #FIXME: PHONYness & when in deps/
+	$(info Creating escript: ./$(APP))
 	@erl -noshell \
-	     -eval 'io:format("Creating escript \"./$(APP)\"\n").' \
 	     -eval 'AccF = fun (F, Acc) -> case re:run(F, "(/\\..+|^\\./(deps/[^/]+/)?(test|doc)/)", [{capture,none}]) of match -> Acc; nomatch -> [F|Acc] end end, escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript main $(APP)"}, {archive, [{case File of "./deps/"++File1 -> File1; _ -> "$(APP)/" ++ File -- "./" end,element(2,file:read_file(File))} || File <- filelib:fold_files(".", ".+", true, AccF, []) ], []} ]).' \
-	     -eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
 	     -s init stop
+	chmod u+x ./$(APP)
 
 ### DOCS -- Compiles the app's documentation into doc/
 
@@ -153,7 +148,7 @@ clean-docs:
 
 .PHONY: clean-escript
 clean-escript:
-	$(if $(wildcard $(APP)), rm $(APP))
+	$(if $(wildcard $(APP)), rm ./$(APP))
 
 ### CLEAN-EBIN -- Removes ebin/ if it exists
 

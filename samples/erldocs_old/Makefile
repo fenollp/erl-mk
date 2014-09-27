@@ -1,5 +1,4 @@
-all: erl.mk
-	$(MAKE) escript
+all: escript | erl.mk
 
 erl.mk:
 	curl -sSo $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@

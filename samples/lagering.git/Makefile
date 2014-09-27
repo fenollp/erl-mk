@@ -1,5 +1,4 @@
-all: erl.mk
-	$(MAKE) $(APP)
+all: app | erl.mk
 
 erl.mk:
 	curl -fsSLo $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@

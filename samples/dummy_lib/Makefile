@@ -1,12 +1,11 @@
-all: erl.mk
-	$(MAKE) $(APP)
+all: app  | erl.mk
 
 erl.mk:
 	curl -fsSLo $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@
 
 dep_sheriff = https://github.com/extend/sheriff.git 0.4.1
 
-iinclude erl.mk
+-include erl.mk
 # Your targets after this line.
 
 clean: clean-ebin

@@ -2,8 +2,7 @@
 
 Include this in your Makefile:
 ```make
-all: erl.mk
-	$(MAKE) $(APP)
+all: app  | erl.mk
 
 erl.mk:
 	curl -fsSLo $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@
@@ -15,6 +14,8 @@ erl.mk:
 test: eunit
 debug: debug-app
 clean: clean-ebin
+
+.PHONY: test debug clean
 ```
 
 Now, `make -j`. This is exquivalent to `rebar -j get-deps compile`.
@@ -63,9 +64,9 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 ### API
 | `make` target        | Action                                                      |
 | -------------------- | ----------------------------------------------------------- |
-| `make $(APP)`        | ⇔ `make deps` then `make app`                               |
-| `make debug-app`     | ⇔ `make $(APP)` then starts a readied REPL                  |
-| `make app`           | Compile files from `src/` | `templates/`                    |
+| `make debug-app`     | ⇔ `make app` then starts a readied REPL                     |
+| `make deps`          | Fetch & compile dependencies and deps of deps, into `deps/` |
+| `make app`           | ⇔ `make deps` then compile files from `src/` | `templates/` |
 | `make eunit`         | Compile & EUnit-test files in `test/*_tests.erl`            |
 | `make eunit.Mod`     | Compile & EUnit-test code in `test/Mod_tests.erl`           |
 | `make ct`            | Compile & CommonTest-test files in `test/*_SUITE.erl`       |

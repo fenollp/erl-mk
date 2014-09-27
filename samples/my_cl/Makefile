@@ -1,4 +1,5 @@
-all: erl.mk
+all: app | erl.mk
+	$(MAKE) examples
 
 erl.mk:
 	wget -nv -O $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@
