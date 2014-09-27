@@ -70,7 +70,7 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 | `make eunit.Mod`     | Compile & EUnit-test code in `test/Mod_tests.erl`           |
 | `make ct`            | Compile & CommonTest-test files in `test/*_SUITE.erl`       |
 | `make ct.Mod`        | Compile & CommonTest-test code in `test/Mod_SUITE.erl`      |
-| `make escript`       | Generate a stand-alone `escript` executable                 |
+| `make escript`       | Create a stand-alone `escript` executable                   |
 | `make docs`          | Generate the app's documentation into `doc/`                |
 | `make clean-docs`    | Remove `doc/{edoc-info,*.{css,html,png}}`                   |
 | `make clean-escript` | Remove `./$(APP)` executable                                |
@@ -93,12 +93,11 @@ dep_bullet = https://github.com/extend/bullet.git 0.4.1
 * Refactor using `aTarget: localVariable = val`
     * *localVariable is then expanded when used, not when declared*
     * Also look at `aTarget:: …`. Especially for `clean` targets.
-* Include test suite in codebase
-* Refactor `escript` using `filelib:fold_files/5`
+* Automate test suite
 * Add `make help`
 * Require `sh` instead of `bash`
 * Option to compile `deps/` using `make -f erl.mk …` instead of default `rebar`
-    * How about `depsWith=erl.mk make deps`?
+    * How about `make using=erl.mk deps`?
 * Use make's `$(info …)` in place of `io:format/1` calls
 
 

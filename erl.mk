@@ -121,11 +121,11 @@ logs/:
 
 ### ESCRIPT -- Create a stand-alone EScript executable
 
-#.PHONY: escript FIXME maybe?
-escript: $(APP) clean-escript #FIXME when in deps? FIXME clean-escript?
+#FIXME: PHONYness
+escript: $(APP) clean-escript #FIXME when in deps?
 	@erl -noshell \
-	     -eval 'io:format("Compiling escript \"./$(APP)\".\n").' \
-	     -eval 'G = fun (_, [], Acc) -> Acc; (F, [Path|Rest], Acc) -> case filelib:is_dir(Path) of false -> F(F, Rest, [Path|Acc]); true -> {ok, Listing} = file:list_dir(Path), Paths = [filename:join(Path, Name) || Name <- Listing, Name /= ".git"], F(F, Paths ++ Rest, Acc) end end, escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript main $(APP)"}, {archive, [{case File of "./deps/"++File1 -> File1; _ -> "$(APP)/" ++ File -- "./" end,element(2,file:read_file(File))} || File <- G(G, ["."], [])], []}]).' \
+	     -eval 'io:format("Creating escript \"./$(APP)\"\n").' \
+	     -eval 'AccF = fun (F, Acc) -> case re:run(F, "(/\\..+|^\\./(deps/[^/]+/)?(test|doc)/)", [{capture,none}]) of match -> Acc; nomatch -> [F|Acc] end end, escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript main $(APP)"}, {archive, [{case File of "./deps/"++File1 -> File1; _ -> "$(APP)/" ++ File -- "./" end,element(2,file:read_file(File))} || File <- filelib:fold_files(".", ".+", true, AccF, []) ], []} ]).' \
 	     -eval '{ok, Mode8} = file:read_file_info("$(APP)"), ok = file:change_mode("$(APP)", element(8,Mode8) bor 8#00100).' \
 	     -s init stop
 
