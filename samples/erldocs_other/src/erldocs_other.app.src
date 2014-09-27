@@ -1,0 +1,15 @@
+{application
+, erldocs_other
+, [ {description, "Generate HTML code for other.erldocs.com"}
+  , {vsn, "1"}
+  , {modules, [ erldocs_other
+              , erldocs_other_core
+              , erldocs_other_utils
+              ]}
+  , {registered, []}
+  , {applications, [ kernel
+                   , stdlib
+                   ]}
+  , {env, []}
+  ]
+}.

@@ -1,0 +1,54 @@
+/* Style inspired from //docs.gl/about.html */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+    margin:0;
+    padding:0;
+    border:0;
+    font-size:100%;
+    font:inherit;
+    vertical-align:baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display:block; }
+body { line-height:1; }
+ol, ul { list-style:none; }
+blockquote, q { quotes:none; }
+blockquote:before, blockquote:after, q:before, q:after { content:''; content:none; }
+table { border-collapse:collapse; border-spacing:0; }
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Roboto Condensed Regular'), local('RobotoCondensed-Regular'), url(http://fonts.gstatic.com/s/robotocondensed/v10/Zd2E9abXLFGSr9G3YK2MsFzqCfRpIA3W6ypxnPISCPA.woff) format('woff');
+}
+
+body { font-family:Roboto; font-size:14px; line-height:150%; }
+pre { margin:10px; }
+h1, h2, h3, h4, h5, h6 { margin-top:10px; margin-bottom:5px; }
+h1 { font-size:36px; font-weight:bold; margin-top:30px; margin-bottom:10px; }
+h2 { font-size:24px; font-weight:bold; margin-top:30px; margin-bottom:10px; }
+h3 { font-size:20px; font-weight:bold; }
+h4 { font-size:18px; font-weight:bold; }
+h5 { font-size:16px; font-weight:bold; }
+h6 { font-size:14px; font-weight:bold; }
+p { margin-top:20px; margin-bottom:20px; }
+em { font-style:italic; }
+strong { font-weight:bold; }
+dt { float:left; width:100px; clear:both; margin-top:10px; }
+dd { float:left; width:540px; margin-top:10px; }
+dl { width:650px; clear:both; display:table; }
+li { margin-left:10px; }
+a { text-decoration:none; }
+
+#front_page {
+    width:950px;
+    margin-left:auto;
+    margin-right:auto;
+    margin-top:180px;
+    text-align:center;
+}
+
+body { background:#f9f9f9; color:#000; }
+a { color:#1364c4; }
+a:visited { color:#13a5c4; }
+a:hover { color:#358acc; }
