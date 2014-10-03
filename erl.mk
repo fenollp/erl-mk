@@ -118,7 +118,7 @@ logs/:
 ### ESCRIPT -- Create a stand-alone EScript executable
 
 escript: app clean-escript #FIXME: PHONYness & when in deps/
-	@bash -c 'find deps/ -name "*.app.src" -exec basename {} \; 2>/dev/null | cut -d. -f1 | while read dep; do es=deps/$$dep/$$dep; [[ -fx $$es ]] && rm -v $$es || true; done'
+	@bash -c 'find deps/ -name "*.app.src" -exec basename {} \; 2>/dev/null | cut -d. -f1 | while read dep; do e=deps/$$dep/$$dep; [[ -f $$e && -x $$e ]] && rm -v $$e || true; done'
 	$(info Creating escript: ./$(APP))
 	@erl -noshell \
 	     -eval 'AccF = fun (F, Acc) -> case re:run(F, "(/\\..+|^\\./(deps/[^/]+/)?(test|doc)/)", [{capture,none}]) of match -> Acc; nomatch -> [F|Acc] end end, escript:create("$(APP)", [ {shebang,default}, {comment,""}, {emu_args,"-escript main $(APP)"}, {archive, [{case File of "./deps/"++File1 -> File1; _ -> "$(APP)/" ++ File -- "./" end,element(2,file:read_file(File))} || File <- filelib:fold_files(".", ".+", true, AccF, []) ], []} ]).' \
