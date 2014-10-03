@@ -37,31 +37,31 @@ ebin/%.app: src/%.app.src               | ebin/
 	     -s init stop
 	cp $< $@
 
-ebin/%.beam: first_flags = -o ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/))
+ebin/%.beam: pz_deps = $(addprefix -pz , $(shell echo deps/*/ebin/))
 ebin/%.beam: include_files = $(wildcard include/*.hrl)
 ebin/%.beam: include_dirs = -I include/ -I deps/
 
 ebin/%.beam: $(include_files) src/%.erl | ebin/
-	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) $<
+	erlc -v -o ebin/ $(pz_deps) $(ERLCFLAGS) $(include_dirs) $<
 
 ebin/%.beam: $(include_files) src/%.xrl | ebin/
-	erlc    $(first_flags) $(ERLCFLAGS) $<
-	erlc    $(first_flags) $(ERLCFLAGS) $(include_dirs) ebin/$*.erl
+	erlc    -o ebin/ $(pz_deps) $(ERLCFLAGS) $<
+	erlc    -o ebin/ $(pz_deps) $(ERLCFLAGS) $(include_dirs) ebin/$*.erl
 
 ebin/%.beam: $(include_files) src/%.yrl | ebin/
-	erlc    $(first_flags) $(ERLCFLAGS) $<
-	erlc    $(first_flags) $(ERLCFLAGS) $(include_dirs) ebin/$*.erl
+	erlc    -o ebin/ $(pz_deps) $(ERLCFLAGS) $<
+	erlc    -o ebin/ $(pz_deps) $(ERLCFLAGS) $(include_dirs) ebin/$*.erl
 
 ebin/%.beam: $(include_files) src/%.S   | ebin/
-	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) +from_asm $<
+	erlc -v -o ebin/ $(pz_deps) $(ERLCFLAGS) $(include_dirs) +from_asm $<
 
 ebin/%.beam: $(include_files) src/%.core| ebin/
-	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) +from_core $<
+	erlc -v -o ebin/ $(pz_deps) $(ERLCFLAGS) $(include_dirs) +from_core $<
 
 ebin/%_dtl.beam: templates/%.dtl        | ebin/
 	$(if $(wildcard deps/erlydtl/),, \
 	    $(error Error compiling $<: deps/erlydtl/ not found))
-	@erl -noshell -pz ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/)) \
+	@erl -noshell -pz ebin/ $(pz_deps) \
 	     -eval 'io:format("Compiling ErlyDTL template: $< -> $@\n").' \
 	     -eval 'erlydtl:compile("$<", $*_dtl, [{out_dir,"ebin/"},{auto_escape,false}]).' \
 	     -s init stop
