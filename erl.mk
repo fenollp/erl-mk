@@ -8,9 +8,10 @@ SHELL = /bin/bash
 APP ?= $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 APPS += $(notdir $(wildcard apps/*))
 DEPS_DIR ?= $(addsuffix /deps, $(realpath .))
+DEPS_APPS = $(wildcard $(DEPS_DIR)/*/apps/*)
 NATIVE_DEPS_DIR ?= $(addsuffix /nativedeps, $(realpath .))
 PROJECT_DIR = $(realpath $(addsuffix /.., $(DEPS_DIR)))
-ERL_LIBS := $(DEPS_DIR):$(realpath apps):$(ERL_LIBS)
+ERL_LIBS := $(DEPS_DIR):$(DEPS_APPS):$(realpath apps):$(ERL_LIBS)
 MIB_INCLUDES ?= $(addprefix -I, $(patsubst %/mibs, %/priv/mibs, $(wildcard $(DEPS_DIR)/*/mibs)))
 
 export DEPS_DIR
