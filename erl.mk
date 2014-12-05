@@ -12,7 +12,7 @@ DEPS_APPS = $(wildcard $(DEPS_DIR)/*/apps)
 NATIVE_DEPS_DIR ?= $(addsuffix /nativedeps, $(realpath .))
 PROJECT_DIR = $(realpath $(addsuffix /.., $(DEPS_DIR)))
 ERL_LIBS := $(DEPS_APPS):$(DEPS_DIR):$(realpath apps):$(ERL_LIBS)
-MIB_INCLUDES ?= $(addprefix -I, $(patsubst %/mibs, %/priv/mibs, $(wildcard $(DEPS_DIR)/*/mibs)))
+MIB_INCLUDES ?= $(addprefix -I, $(patsubst %/mibs, %/priv/mibs, $(wildcard $(DEPS_APPS)/*/mibs) $(wildcard $(DEPS_DIR)/*/mibs)))
 
 export DEPS_DIR
 export NATIVE_DEPS_DIR
