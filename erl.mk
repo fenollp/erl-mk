@@ -134,7 +134,8 @@ ebin/%.app: src/%.app.src | ebin/
 ebin/%.d: $$(wildcard src/%.erl) $$(wildcard src/*/%.erl)   | ebin/
 	$(verbose) erlc -o ebin/ $(ERLCFLAGS) -Iinclude/ -I$(DEPS_DIR)/ -MP -MG -MF $@ $< > /dev/null
 	@gawk '/^[ \t]*-(behaviou?r\(|compile\({parse_transform,)/ {match($$0, /-(behaviou?r\([ \t]*([^) \t]+)|compile\({parse_transform,[ \t]*([^} \t]+))/, a); m = (a[2] a[3]); if (m != "" && ((system("ls src/" m ".erl 1>/dev/null 2>/dev/null") == 0) || (system("ls src/*/" m ".erl 1>/dev/null 2>/dev/null") == 0))) print "\nebin/$*.beam: ebin/" m ".beam"}' < $< >> $@
-
+	@sed -i.bak -e "s#$(DEPS_DIR)#\\$$\(DEPS_DIR\)#" $@
+	@rm $@.bak
 
 ebin/%.beam: $$(wildcard src/%.erl) $$(wildcard src/*/%.erl)   | ebin/
 	@echo $<
