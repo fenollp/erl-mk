@@ -285,7 +285,7 @@ export DEPS_DIR
 FULL_DEPS = $(addsuffix /, $(addprefix $(DEPS_DIR)/, $(DEPS)))
 FULL_DEPS_TARGET = $(addprefix $(DEPS_DIR)/, $(DEPS))
 
-GLOBAL_REBAR = $(shell which rebar || echo "./rebar")
+GLOBAL_REBAR = $(shell which rebar || echo $(pwd)/rebar)
 
 define get_dep
 	@if [[ ! -d "$(DEPS_DIR)/$(1)" ]] ; then \
@@ -305,7 +305,7 @@ define build_dep
 			if [[ -f $(GLOBAL_REBAR) ]]; then \
 				export THIS_REBAR=$(GLOBAL_REBAR) ; \
 			else \
-				echo $(1) has rebar.config but no rebar - pulling form github...; \
+				echo $(1) has rebar.config but no rebar - pulling from github...; \
 				wget -nv -O $(DEPS_DIR)/$(1)/rebar 'https://raw.github.com/id3as/erl-mk/master/rebar'; \
 				chmod 744 $(DEPS_DIR)/$(1)/rebar ; \
 				export THIS_REBAR="./rebar" ; \
