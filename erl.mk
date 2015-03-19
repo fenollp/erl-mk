@@ -42,6 +42,9 @@ apps-all: build-deps apps
 apps: $(APPS)
 	@echo > /dev/null
 
+tags:
+	rm -f TAGS && find . -type f -iname "*.[eh]rl" -o -iname "*.[ch]" -o -iname "*.js" -o -iname "*.hbs" -o -iname "*.sh" -o -iname "*.c" -o -iname "*.h" | grep -v priv/www/vendor | grep -v "\/_rel" | xargs etags --append
+
 $(APPS): erl.mk
 	@if [ -f apps/$@/Makefile ] || [ -f apps/$@/makefile ] ; then \
 		$(MAKE) -C apps/$@ APP=$@; \
@@ -177,7 +180,7 @@ ifeq (,$(findstring ___clean,___$(MAKECMDGOALS)))
 -include $(DEPENDENCIES)
 endif
 
-.PHONY: app
+.PHONY: app tags
 
 ##------------------------------------------------------------------------------
 ## EUNIT
