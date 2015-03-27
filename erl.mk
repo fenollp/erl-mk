@@ -320,9 +320,9 @@ define build_dep
 		cd $(DEPS_DIR)/$(1) && $$THIS_REBAR deps_dir=$(DEPS_DIR) get-deps compile && cd ../.. ; \
 	else \
 		if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
-			make -C $(DEPS_DIR)/$(1) ; \
+			$(MAKE) -C $(DEPS_DIR)/$(1) ; \
 		else \
-			make -C $(DEPS_DIR)/$(1) -f ../../erl.mk ; \
+			$(MAKE) -C $(DEPS_DIR)/$(1) -f ../../erl.mk ; \
 		fi \
 	fi
 endef
@@ -355,9 +355,9 @@ define clean_dep
 		cd $(DEPS_DIR)/$(1) && $$THIS_REBAR deps_dir=$(DEPS_DIR) clean && cd ../.. ; \
 	else \
 		if [[ -f $(DEPS_DIR)/$(1)/makefile ]] || [[ -f $(DEPS_DIR)/$(1)/Makefile ]] ; then \
-			make -C $(DEPS_DIR)/$(1) clean ; \
+			$(MAKE) -C $(DEPS_DIR)/$(1) clean ; \
 		else \
-			make -C $(DEPS_DIR)/$(1) -f ../../erl.mk clean; \
+			$(MAKE) -C $(DEPS_DIR)/$(1) -f ../../erl.mk clean; \
 		fi \
 	fi
 endef
