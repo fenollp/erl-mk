@@ -3,7 +3,7 @@ all: app | erl.mk
 erl.mk:
 	curl -fsSLo $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@
 
-dep_lager = https://github.com/basho/lager.git 2.0.3
+dep_lager = https://github.com/basho/lager 2.0.3
 
 -include erl.mk
 # Your targets after this line.
