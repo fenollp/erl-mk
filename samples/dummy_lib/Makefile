@@ -3,7 +3,7 @@ all: app  | erl.mk
 erl.mk:
 	curl -fsSLo $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@
 
-dep_sheriff = https://github.com/extend/sheriff.git 0.4.1
+dep_sheriff = https://github.com/extend/sheriff 0.4.1
 
 -include erl.mk
 # Your targets after this line.

@@ -1,7 +1,7 @@
 all: escript
 
 
-dep_strings_attached = https://github.com/fenollp/strings_attached.git
+dep_strings_attached = https://github.com/fenollp/strings_attached master
 
 -include erl.mk
 

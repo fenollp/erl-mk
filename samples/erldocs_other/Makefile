@@ -3,7 +3,7 @@ all: escript | erl.mk
 erl.mk:
 	curl -fsSLo $@ 'https://raw.github.com/fenollp/erl-mk/master/erl.mk' || rm $@
 
-dep_erldocs = https://github.com/erldocs/erldocs.git master
+dep_erldocs = https://github.com/erldocs/erldocs master
 
 -include erl.mk
 # Your targets after this line.

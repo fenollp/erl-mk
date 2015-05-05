@@ -14,7 +14,4 @@ distclean: clean clean-docs clean-deps
 
 clean: clean-ebin
 
-local_vars_indeed_inaccessible: all
-	echo .$(include_dirs).
-
 debug: debug-app

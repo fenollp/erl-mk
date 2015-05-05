@@ -15,13 +15,17 @@ deps: $(patsubst dep_%,deps/%/,$(filter dep_%,$(.VARIABLES)))
 	    mv -v deps/*/deps/* deps/ 2>/dev/null ; rmdir deps/*/deps/)
 
 deps/%/:
-	git clone --no-checkout -- $(word 1,$(dep_$*)) $@
-	cd $@ && git checkout --quiet $(word 2,$(dep_$*)) && cd ../..
+	@bash -c "( mkdir -p deps && \
+	    curl -fsSLo $@.zip '$(word 1,$(dep_$*))/archive/$(word 2,$(dep_$*)).zip' && \
+	    unzip -q $@.zip -d deps && mv $@-* $@ && \
+	    echo 'curl -fsSLo $@ $(word 1,$(dep_$*))/archive/$(word 2,$(dep_$*)).zip' \
+	) || ( git clone --no-checkout -- $(word 1,$(dep_$*)) $@ && \
+	    cd $@ && git checkout --quiet $(word 2,$(dep_$*)) && cd - )"
 	@bash -c "if [[ -f $@/Makefile ]]; \
 	then echo '$(MAKE) -C $@' ; \
 	           $(MAKE) -C $@  ; \
-	else echo 'cd $@ && rebar get-deps compile && cd ../..' ; \
-	           cd $@ && rebar get-deps compile && cd ../..  ; fi"
+	else echo 'cd $@ && rebar get-deps compile && cd -' ; \
+	           cd $@ && rebar get-deps compile && cd -  ; fi"
 
 ### APP -- Compiles src/ into ebin/
 
