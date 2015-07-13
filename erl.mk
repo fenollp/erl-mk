@@ -288,7 +288,7 @@ export DEPS_DIR
 FULL_DEPS = $(addsuffix /, $(addprefix $(DEPS_DIR)/, $(DEPS)))
 FULL_DEPS_TARGET = $(addprefix $(DEPS_DIR)/, $(DEPS))
 
-GLOBAL_REBAR = $(shell which rebar || echo $(pwd)/rebar)
+GLOBAL_REBAR = $(shell which rebar 2> /dev/null || echo $(pwd)/rebar)
 
 define get_dep
 	@if [[ ! -d "$(DEPS_DIR)/$(1)" ]] ; then \
