@@ -9,4 +9,4 @@ distclean: clean clean-deps
 
 .PHONY: distclean clean test
 
-test: ct eunit
+test: eunit ct
