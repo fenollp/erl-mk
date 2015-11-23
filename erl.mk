@@ -86,7 +86,7 @@ eunit.%: include_dirs = -I include/ -I deps/
 eunit.%: $(include_files)               | app
 	erlc -v $(first_flags) -DTEST=1 -DEUNIT $(ERLCFLAGS) $(include_dirs) test/$*_tests.erl
 	@erl -noshell -pz ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/)) \
-	     -eval 'io:format("Module $*_tests:\n"), eunit:test($*_tests).' \
+	     -eval 'io:format("Module $*_tests:\n"), case eunit:test($*_tests, [verbose]) of ok -> passed; _ -> init:stop(1) end.' \
 	     -s init stop
 .PHONY: eunit.%
 
