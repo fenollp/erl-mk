@@ -81,10 +81,11 @@ eunit: $(patsubst test/%_tests.erl, eunit.%, $(wildcard test/*_tests.erl))
 eunit.%: first_flags = -o ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/))
 eunit.%: include_files = $(wildcard include/*.hrl)
 eunit.%: include_dirs = -I include/ -I deps/
+eunit.%: ERLCFLAGS += -DTEST=1 -DEUNIT
 
 #eunit.%: ebin/%_tests.beam #FIXME
 eunit.%: $(include_files)               | app
-	erlc -v $(first_flags) -DTEST=1 -DEUNIT $(ERLCFLAGS) $(include_dirs) test/$*_tests.erl
+	erlc -v $(first_flags) $(ERLCFLAGS) $(include_dirs) test/$*_tests.erl
 	@erl -noshell -pz ebin/ $(patsubst %,-pz %,$(wildcard deps/*/ebin/)) \
 	     -eval 'io:format("Module $*_tests:\n"), case eunit:test($*_tests, [verbose]) of ok -> passed; _ -> init:stop(1) end.' \
 	     -s init stop
