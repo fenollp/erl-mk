@@ -1,4 +1,5 @@
 APP = $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
+ERLCFLAGS += $(ERLC_OPTS)
 
 ### DEBUG-APP -- Load compiled code into a new REPL
 
