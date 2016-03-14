@@ -5,10 +5,14 @@
 
 SHELL = /bin/bash
 
+space :=
+space +=
+comma := ,
+
 APP ?= $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 APPS += $(notdir $(wildcard apps/*))
 DEPS_DIR ?= $(addsuffix /deps, $(realpath .))
-DEPS_APPS = $(wildcard $(DEPS_DIR)/*/apps)
+DEPS_APPS = $(subst $(space),:,$(wildcard $(DEPS_DIR)/*/apps))
 NATIVE_DEPS_DIR ?= $(addsuffix /nativedeps, $(realpath .))
 PROJECT_DIR = $(realpath $(addsuffix /.., $(DEPS_DIR)))
 ERL_LIBS := $(DEPS_APPS):$(DEPS_DIR):$(realpath apps):$(ERL_LIBS)
@@ -27,10 +31,6 @@ else
 .DEFAULT_GOAL := all
 
 endif
-
-space :=
-space +=
-comma := ,
 
 V ?= 0
 verbose_0 = @echo -n;
