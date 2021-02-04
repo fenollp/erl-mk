@@ -3,7 +3,7 @@
 ## GENERAL
 ##------------------------------------------------------------------------------
 
-SHELL = /bin/bash
+SHELL = /usr/bin/env bash
 
 space :=
 space +=
