@@ -5,8 +5,7 @@
 
 SHELL = /usr/bin/env bash
 
-space :=
-space +=
+space := $(subst ,, )
 comma := ,
 
 APP ?= $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
