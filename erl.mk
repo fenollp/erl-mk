@@ -11,6 +11,7 @@ comma := ,
 APP ?= $(patsubst src/%.app.src,%,$(wildcard src/*.app.src))
 APPS += $(notdir $(wildcard apps/*))
 DEPS_DIR ?= $(addsuffix /deps, $(realpath .))
+APPS_EBINS := $(addprefix apps/, $(addsuffix /ebin, $(notdir $(wildcard apps/*))))
 DEPS_APPS = $(subst $(space),:,$(wildcard $(DEPS_DIR)/*/apps))
 NATIVE_DEPS_DIR ?= $(addsuffix /nativedeps, $(realpath .))
 PROJECT_DIR = $(realpath $(addsuffix /.., $(DEPS_DIR)))
@@ -43,8 +44,11 @@ apps: $(APPS)
 
 tags:
 	rm -f TAGS && find . -type f -iname "*.[eh]rl" -o -iname "*.[ch]" -o -iname "*.js" -o -iname "*.hbs" -o -iname "*.sh" -o -iname "*.c" -o -iname "*.h" | grep -v priv/www/vendor | grep -v "\/_rel" | xargs etags --append
+	
+$(APPS_EBINS):
+	@mkdir -p $@
 
-$(APPS): erl.mk
+$(APPS): erl.mk $(APPS_EBINS)
 	@if [ -f apps/$@/Makefile ] || [ -f apps/$@/makefile ] ; then \
 		$(MAKE) -C apps/$@ APP=$@; \
 	else \
