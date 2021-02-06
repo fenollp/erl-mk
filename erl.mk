@@ -447,7 +447,7 @@ else
 RELX ?= $(PROJECT_DIR)/relx
 export RELX
 
-RELX_URL ?= https://github.com/erlware/relx/releases/download/v1.1.0/relx
+RELX_URL ?= https://github.com/erlware/relx/releases/download/v3.4.0/relx
 RELX_OPTS ?=
 
 define get_relx
